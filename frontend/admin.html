@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard - BookBot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-950 text-white min-h-screen">
+
+  <div class="max-w-7xl mx-auto p-6">
+
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-4xl font-bold">Admin Dashboard</h1>
+        <p id="welcome" class="text-slate-400 mt-1"></p>
+      </div>
+
+      <button onclick="logout()" class="bg-red-600 px-4 py-2 rounded-xl">
+        Logout
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+        <p class="text-slate-400">Customers</p>
+        <h2 id="totalCustomers" class="text-3xl font-bold">0</h2>
+      </div>
+
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+        <p class="text-slate-400">Total Slots</p>
+        <h2 id="totalSlots" class="text-3xl font-bold">0</h2>
+      </div>
+
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+        <p class="text-slate-400">Available</p>
+        <h2 id="availableSlots" class="text-3xl font-bold">0</h2>
+      </div>
+
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+        <p class="text-slate-400">Confirmed</p>
+        <h2 id="confirmedBookings" class="text-3xl font-bold">0</h2>
+      </div>
+
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+        <p class="text-slate-400">Cancelled</p>
+        <h2 id="cancelledBookings" class="text-3xl font-bold">0</h2>
+      </div>
+
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
+        <h2 class="text-2xl font-semibold mb-4">Add Slot</h2>
+
+        <input id="date" class="w-full mb-3 p-3 rounded-xl bg-slate-800" placeholder="Date e.g. 2026-05-29">
+
+        <input id="time" class="w-full mb-3 p-3 rounded-xl bg-slate-800" placeholder="Time e.g. 21:00">
+
+        <button onclick="addSlot()" class="bg-yellow-600 w-full py-3 rounded-xl font-semibold">
+          Add Slot
+        </button>
+      </div>
+
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 md:col-span-2">
+        <h2 class="text-2xl font-semibold mb-4">All Slots</h2>
+
+        <button onclick="loadSlots()" class="bg-blue-600 px-4 py-2 rounded-xl mb-4">
+          Refresh Slots
+        </button>
+
+        <div id="slots" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+      </div>
+
+    </div>
+
+    <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 mt-6">
+      <h2 class="text-2xl font-semibold mb-4">All Bookings</h2>
+
+      <button onclick="loadBookings()" class="bg-purple-600 px-4 py-2 rounded-xl mb-4">
+        Refresh Bookings
+      </button>
+
+      <div id="bookings" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const API = "http://127.0.0.1:8000";
+
+    const user = JSON.parse(localStorage.getItem("bookbot_user"));
+
+    if (!user) {
+      window.location.href = "login.html";
+    }
+
+    if (user && user.role !== "admin") {
+      window.location.href = "dashboard.html";
+    }
+
+    document.getElementById("welcome").innerHTML = "Welcome, " + user.name;
+
+    async function loadAnalytics() {
+      const response = await fetch(API + "/analytics");
+      const data = await response.json();
+
+      document.getElementById("totalCustomers").innerHTML = data.total_customers;
+      document.getElementById("totalSlots").innerHTML = data.total_slots;
+      document.getElementById("availableSlots").innerHTML = data.available_slots;
+      document.getElementById("confirmedBookings").innerHTML = data.confirmed_bookings;
+      document.getElementById("cancelledBookings").innerHTML = data.cancelled_bookings;
+    }
+
+    async function addSlot() {
+      const date = document.getElementById("date").value;
+      const time = document.getElementById("time").value;
+
+      if (date === "" || time === "") {
+        alert("Please enter date and time");
+        return;
+      }
+
+      const url =
+        API +
+        "/slots?date=" +
+        encodeURIComponent(date) +
+        "&time=" +
+        encodeURIComponent(time);
+
+      const response = await fetch(url, {
+        method: "POST"
+      });
+
+      const data = await response.json();
+
+      alert(data.message);
+
+      document.getElementById("date").value = "";
+      document.getElementById("time").value = "";
+
+      loadSlots();
+      loadAnalytics();
+    }
+
+    async function loadSlots() {
+      const response = await fetch(API + "/slots");
+      const data = await response.json();
+
+      let html = "";
+
+      for (let slot of data) {
+        let statusClass = "text-green-400";
+        let statusText = "Available";
+        let deleteButton = "";
+
+        if (slot.is_booked === true) {
+          statusClass = "text-red-400";
+          statusText = "Booked";
+        } else {
+          deleteButton = `
+            <button onclick="deleteSlot(${slot.id})" class="mt-3 bg-red-600 px-3 py-2 rounded-xl">
+              Delete Slot
+            </button>
+          `;
+        }
+
+        html += `
+          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <p class="font-semibold">Slot ID: ${slot.id}</p>
+            <p class="text-slate-400">${slot.date} at ${slot.time}</p>
+            <p class="${statusClass}">Status: ${statusText}</p>
+            ${deleteButton}
+          </div>
+        `;
+      }
+
+      document.getElementById("slots").innerHTML = html || "<p>No slots found.</p>";
+    }
+
+    async function deleteSlot(slotId) {
+      const response = await fetch(API + "/slots/" + slotId, {
+        method: "DELETE"
+      });
+
+      const data = await response.json();
+
+      alert(data.message);
+
+      loadSlots();
+      loadAnalytics();
+    }
+
+    async function loadBookings() {
+      const response = await fetch(API + "/bookings");
+      const data = await response.json();
+
+      let html = "";
+
+      for (let booking of data) {
+        let cancelButton = "";
+
+        if (booking.status === "confirmed") {
+          cancelButton = `
+            <button onclick="cancelBooking(${booking.id})" class="mt-3 bg-red-600 px-3 py-2 rounded-xl">
+              Cancel Booking
+            </button>
+          `;
+        }
+
+        html += `
+          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <p class="font-semibold">${booking.customer_name}</p>
+            <p class="text-slate-400">${booking.customer_email}</p>
+            <p class="text-slate-400">${booking.date} at ${booking.time}</p>
+            <p class="text-slate-400">Slot ID: ${booking.slot_id}</p>
+            <p class="text-green-400">Status: ${booking.status}</p>
+            ${cancelButton}
+          </div>
+        `;
+      }
+
+      document.getElementById("bookings").innerHTML = html || "<p>No bookings found.</p>";
+    }
+
+    async function cancelBooking(bookingId) {
+      const response = await fetch(API + "/bookings/" + bookingId, {
+        method: "DELETE"
+      });
+
+      const data = await response.json();
+
+      alert(data.message);
+
+      loadBookings();
+      loadSlots();
+      loadAnalytics();
+    }
+
+    function logout() {
+      localStorage.removeItem("bookbot_user");
+      window.location.href = "login.html";
+    }
+
+    loadAnalytics();
+    loadSlots();
+    loadBookings();
+  </script>
+
+</body>
+</html>

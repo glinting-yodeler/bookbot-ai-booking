@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Customer Dashboard - BookBot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-950 text-white min-h-screen">
+
+  <div class="max-w-6xl mx-auto p-6">
+
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-4xl font-bold">Customer Dashboard</h1>
+        <p id="welcome" class="text-slate-400 mt-1"></p>
+      </div>
+
+      <button onclick="logout()" class="bg-red-600 px-4 py-2 rounded-xl">
+        Logout
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
+        <h2 class="text-2xl font-semibold mb-4">Available Slots</h2>
+        <button onclick="loadSlots()" class="bg-blue-600 px-4 py-2 rounded-xl mb-4">
+          Refresh Slots
+        </button>
+        <div id="slots" class="space-y-3"></div>
+      </div>
+
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
+        <h2 class="text-2xl font-semibold mb-4">My Bookings</h2>
+        <button onclick="loadMyBookings()" class="bg-purple-600 px-4 py-2 rounded-xl mb-4">
+          Refresh Bookings
+        </button>
+        <div id="bookings" class="space-y-3"></div>
+      </div>
+
+    </div>
+
+    <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 mt-6">
+      <h2 class="text-2xl font-semibold mb-4">AI Chat Assistant</h2>
+
+      <div id="chat" class="bg-slate-950 rounded-xl p-4 h-56 overflow-y-auto mb-3 text-slate-300">
+        <p><b>Bot:</b> Hi, I can help you find and book slots.</p>
+      </div>
+
+      <input id="message" class="w-full mb-3 p-3 rounded-xl bg-slate-800" placeholder="Ask: what slots are available?">
+
+      <button onclick="sendMessage()" class="bg-blue-600 w-full py-3 rounded-xl font-semibold">
+        Send
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    const API = "http://127.0.0.1:8000";
+
+    const user = JSON.parse(localStorage.getItem("bookbot_user"));
+
+    if (!user) {
+      window.location.href = "login.html";
+    }
+
+    if (user && user.role !== "customer") {
+      window.location.href = "admin.html";
+    }
+
+    document.getElementById("welcome").innerHTML = "Welcome, " + user.name;
+
+    async function loadSlots() {
+      const response = await fetch(API + "/available-slots");
+      const data = await response.json();
+
+      let html = "";
+
+      for (let slot of data) {
+        html += `
+          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <p class="font-semibold">Slot ID: ${slot.id}</p>
+            <p class="text-slate-400">${slot.date} at ${slot.time}</p>
+            <button onclick="bookSlot(${slot.id})" class="mt-3 bg-green-600 px-4 py-2 rounded-xl">
+              Book This Slot
+            </button>
+          </div>
+        `;
+      }
+
+      document.getElementById("slots").innerHTML = html || "<p>No available slots.</p>";
+    }
+
+    async function bookSlot(slotId) {
+      const url =
+        API +
+        "/bookings?user_id=" +
+        encodeURIComponent(user.id) +
+        "&slot_id=" +
+        encodeURIComponent(slotId);
+
+      const response = await fetch(url, {
+        method: "POST"
+      });
+
+      const data = await response.json();
+
+      alert(data.message);
+
+      loadSlots();
+      loadMyBookings();
+    }
+
+    async function loadMyBookings() {
+      const response = await fetch(API + "/my-bookings/" + user.id);
+      const data = await response.json();
+
+      let html = "";
+
+      for (let booking of data) {
+        let cancelButton = "";
+
+        if (booking.status === "confirmed") {
+          cancelButton = `
+            <button onclick="cancelBooking(${booking.id})" class="mt-3 bg-red-600 px-4 py-2 rounded-xl">
+              Cancel Booking
+            </button>
+          `;
+        }
+
+        html += `
+          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <p class="font-semibold">${booking.date} at ${booking.time}</p>
+            <p class="text-slate-400">Slot ID: ${booking.slot_id}</p>
+            <p class="text-green-400">Status: ${booking.status}</p>
+            ${cancelButton}
+          </div>
+        `;
+      }
+
+      document.getElementById("bookings").innerHTML = html || "<p>No bookings yet.</p>";
+    }
+
+    async function cancelBooking(bookingId) {
+      const response = await fetch(API + "/bookings/" + bookingId, {
+        method: "DELETE"
+      });
+
+      const data = await response.json();
+
+      alert(data.message);
+
+      loadSlots();
+      loadMyBookings();
+    }
+
+    async function sendMessage() {
+      const message = document.getElementById("message").value;
+
+      if (message === "") {
+        return;
+      }
+
+      const url =
+        API +
+        "/chat?message=" +
+        encodeURIComponent(message);
+
+      const response = await fetch(url, {
+        method: "POST"
+      });
+
+      const data = await response.json();
+
+      document.getElementById("chat").innerHTML += `<p><b>You:</b> ${message}</p>`;
+      document.getElementById("chat").innerHTML += `<p><b>Bot:</b> ${data.reply}</p>`;
+
+      document.getElementById("message").value = "";
+    }
+
+    function logout() {
+      localStorage.removeItem("bookbot_user");
+      window.location.href = "login.html";
+    }
+
+    loadSlots();
+    loadMyBookings();
+  </script>
+
+</body>
+</html>

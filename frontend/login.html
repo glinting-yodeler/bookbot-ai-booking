@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login - BookBot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center">
+
+  <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 w-full max-w-md">
+
+    <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
+    <p class="text-slate-400 mb-6">Login to BookBot AI Booking.</p>
+
+    <input id="email" class="w-full mb-3 p-3 rounded-xl bg-slate-800" placeholder="Email">
+
+    <input id="password" type="password" class="w-full mb-4 p-3 rounded-xl bg-slate-800" placeholder="Password">
+
+    <button onclick="login()" class="bg-blue-600 w-full py-3 rounded-xl font-semibold">
+      Login
+    </button>
+
+    <p class="text-slate-400 mt-5 text-center">
+      No account?
+      <a href="register.html" class="text-blue-400">Register</a>
+    </p>
+
+    <div class="bg-slate-800 mt-6 p-4 rounded-xl text-sm text-slate-300">
+      <p class="font-semibold mb-1">Demo Admin Login</p>
+      <p>Email: admin@bookbot.com</p>
+      <p>Password: admin123</p>
+    </div>
+
+  </div>
+
+  <script>
+    const API = "http://127.0.0.1:8000";
+
+    async function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      if (email === "" || password === "") {
+        alert("Please fill all fields");
+        return;
+      }
+
+      const url =
+        API +
+        "/login?email=" +
+        encodeURIComponent(email) +
+        "&password=" +
+        encodeURIComponent(password);
+
+      const response = await fetch(url, {
+        method: "POST"
+      });
+
+      const data = await response.json();
+
+      if (data.success === false) {
+        alert(data.message);
+        return;
+      }
+
+      localStorage.setItem("bookbot_user", JSON.stringify(data.user));
+
+      if (data.user.role === "admin") {
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "dashboard.html";
+      }
+    }
+  </script>
+
+</body>
+</html>

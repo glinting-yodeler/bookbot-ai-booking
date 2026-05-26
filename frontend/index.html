@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BookBot MVP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-950 text-white min-h-screen">
+  <div class="max-w-6xl mx-auto p-6">
+    <h1 class="text-4xl font-bold mb-2">BookBot AI Booking</h1>
+    <p class="text-slate-400 mb-8">Dark modern SaaS demo with booking, admin slots, database, and AI assistant.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
+        <h2 class="text-2xl font-semibold mb-4">Available Slots</h2>
+        <button onclick="loadSlots()" class="bg-blue-600 px-4 py-2 rounded-xl mb-4">Refresh Slots</button>
+        <div id="slots" class="space-y-3"></div>
+      </div>
+
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
+        <h2 class="text-2xl font-semibold mb-4">Create Booking</h2>
+        <input id="name" class="w-full mb-3 p-3 rounded-xl bg-slate-800" placeholder="Customer name">
+        <input id="phone" class="w-full mb-3 p-3 rounded-xl bg-slate-800" placeholder="Phone number">
+        <input id="slotId" class="w-full mb-3 p-3 rounded-xl bg-slate-800" placeholder="Slot ID">
+        <button onclick="createBooking()" class="bg-green-600 w-full py-3 rounded-xl font-semibold">Book Slot</button>
+      </div>
+
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
+        <h2 class="text-2xl font-semibold mb-4">Admin: Add Slot</h2>
+        <input id="newDate" class="w-full mb-3 p-3 rounded-xl bg-slate-800" placeholder="Date e.g. 2026-05-29">
+        <input id="newTime" class="w-full mb-3 p-3 rounded-xl bg-slate-800" placeholder="Time e.g. 21:00">
+        <button onclick="addSlot()" class="bg-yellow-600 w-full py-3 rounded-xl font-semibold">Add Slot</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
+        <h2 class="text-2xl font-semibold mb-4">Bookings</h2>
+        <button onclick="loadBookings()" class="bg-purple-600 px-4 py-2 rounded-xl mb-4">Refresh Bookings</button>
+        <div id="bookings" class="space-y-3"></div>
+      </div>
+
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
+        <h2 class="text-2xl font-semibold mb-4">AI Chat Assistant</h2>
+        <div id="chat" class="bg-slate-950 rounded-xl p-4 h-52 overflow-y-auto mb-3 text-slate-300">
+          <p><b>Bot:</b> Hi, I can help with booking slots.</p>
+        </div>
+        <input id="message" class="w-full mb-3 p-3 rounded-xl bg-slate-800" placeholder="Ask: what slots are available?">
+        <button onclick="sendMessage()" class="bg-blue-600 w-full py-3 rounded-xl font-semibold">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "http://127.0.0.1:8000";
+
+    async function loadSlots() {
+      const response = await fetch(API + "/available-slots");
+      const data = await response.json();
+
+      let html = "";
+
+      for (let slot of data) {
+        html += `
+          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <p class="font-semibold">Slot ID: ${slot.id}</p>
+            <p class="text-slate-400">${slot.date} at ${slot.time}</p>
+          </div>
+        `;
+      }
+
+      document.getElementById("slots").innerHTML = html || "<p>No slots available.</p>";
+    }
+
+    async function addSlot() {
+      const date = document.getElementById("newDate").value;
+      const time = document.getElementById("newTime").value;
+
+      const url = API + "/slots?date=" + encodeURIComponent(date) + "&time=" + encodeURIComponent(time);
+
+      const response = await fetch(url, {
+        method: "POST"
+      });
+
+      const data = await response.json();
+
+      alert(data.message);
+
+      document.getElementById("newDate").value = "";
+      document.getElementById("newTime").value = "";
+
+      loadSlots();
+    }
+
+    async function createBooking() {
+      const name = document.getElementById("name").value;
+      const phone = document.getElementById("phone").value;
+      const slotId = document.getElementById("slotId").value;
+
+      const url =
+        API +
+        "/bookings?customer_name=" +
+        encodeURIComponent(name) +
+        "&customer_phone=" +
+        encodeURIComponent(phone) +
+        "&slot_id=" +
+        encodeURIComponent(slotId);
+
+      const response = await fetch(url, {
+        method: "POST"
+      });
+
+      const data = await response.json();
+
+      alert(data.message);
+
+      document.getElementById("name").value = "";
+      document.getElementById("phone").value = "";
+      document.getElementById("slotId").value = "";
+
+      loadSlots();
+      loadBookings();
+    }
+
+    async function loadBookings() {
+      const response = await fetch(API + "/bookings");
+      const data = await response.json();
+
+      let html = "";
+
+      for (let booking of data) {
+        html += `
+          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <p class="font-semibold">${booking.customer_name}</p>
+            <p class="text-slate-400">${booking.customer_phone}</p>
+            <p class="text-slate-400">${booking.date} at ${booking.time}</p>
+            <p class="text-slate-400">Slot ID: ${booking.slot_id}</p>
+            <p class="text-green-400">Status: ${booking.status}</p>
+            <button onclick="cancelBooking(${booking.id})" class="mt-3 bg-red-600 px-3 py-2 rounded-xl">
+              Cancel Booking
+            </button>
+          </div>
+        `;
+      }
+
+      document.getElementById("bookings").innerHTML = html || "<p>No bookings yet.</p>";
+    }
+
+    async function cancelBooking(bookingId) {
+      const response = await fetch(API + "/bookings/" + bookingId, {
+        method: "DELETE"
+      });
+
+      const data = await response.json();
+
+      alert(data.message);
+
+      loadSlots();
+      loadBookings();
+    }
+
+    async function sendMessage() {
+      const message = document.getElementById("message").value;
+      const url = API + "/chat?message=" + encodeURIComponent(message);
+
+      const response = await fetch(url, {
+        method: "POST"
+      });
+
+      const data = await response.json();
+
+      document.getElementById("chat").innerHTML += `<p><b>You:</b> ${message}</p>`;
+      document.getElementById("chat").innerHTML += `<p><b>Bot:</b> ${data.reply}</p>`;
+
+      document.getElementById("message").value = "";
+    }
+
+    loadSlots();
+    loadBookings();
+  </script>
+</body>
+</html>

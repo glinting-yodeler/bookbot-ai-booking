@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register - BookBot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center">
+
+  <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 w-full max-w-md">
+
+    <h1 class="text-3xl font-bold mb-2">Create Account</h1>
+    <p class="text-slate-400 mb-6">Register for BookBot AI Booking.</p>
+
+    <input id="name" class="w-full mb-3 p-3 rounded-xl bg-slate-800" placeholder="Full name">
+
+    <input id="email" class="w-full mb-3 p-3 rounded-xl bg-slate-800" placeholder="Email">
+
+    <input id="password" type="password" class="w-full mb-3 p-3 rounded-xl bg-slate-800" placeholder="Password">
+
+    <select id="role" class="w-full mb-4 p-3 rounded-xl bg-slate-800">
+      <option value="customer">Customer</option>
+      <option value="admin">Admin</option>
+    </select>
+
+    <button onclick="register()" class="bg-blue-600 w-full py-3 rounded-xl font-semibold">
+      Register
+    </button>
+
+    <p class="text-slate-400 mt-5 text-center">
+      Already have an account?
+      <a href="login.html" class="text-blue-400">Login</a>
+    </p>
+
+  </div>
+
+  <script>
+    const API = "http://127.0.0.1:8000";
+
+    async function register() {
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const role = document.getElementById("role").value;
+
+      if (name === "" || email === "" || password === "") {
+        alert("Please fill all fields");
+        return;
+      }
+
+      const url =
+        API +
+        "/register?name=" +
+        encodeURIComponent(name) +
+        "&email=" +
+        encodeURIComponent(email) +
+        "&password=" +
+        encodeURIComponent(password) +
+        "&role=" +
+        encodeURIComponent(role);
+
+      const response = await fetch(url, {
+        method: "POST"
+      });
+
+      const data = await response.json();
+
+      alert(data.message);
+
+      if (data.success === true) {
+        window.location.href = "login.html";
+      }
+    }
+  </script>
+
+</body>
+</html>
