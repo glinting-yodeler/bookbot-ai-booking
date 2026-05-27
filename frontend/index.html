@@ -5,203 +5,553 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
+    * {
+      scroll-behavior: smooth;
+    }
+
     body {
       background:
-        radial-gradient(circle at top left, rgba(14, 165, 233, 0.25), transparent 30%),
-        radial-gradient(circle at top right, rgba(168, 85, 247, 0.22), transparent 30%),
+        radial-gradient(circle at 10% 10%, rgba(56, 189, 248, 0.28), transparent 32%),
+        radial-gradient(circle at 90% 15%, rgba(168, 85, 247, 0.25), transparent 30%),
+        radial-gradient(circle at 50% 90%, rgba(59, 130, 246, 0.16), transparent 35%),
         #020617;
+      overflow-x: hidden;
     }
 
     .glass {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(18px);
+      background: rgba(15, 23, 42, 0.68);
+      backdrop-filter: blur(22px);
+      border: 1px solid rgba(148, 163, 184, 0.22);
     }
 
-    .float {
-      animation: float 4s ease-in-out infinite;
+    .deep-glass {
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.85), rgba(2, 6, 23, 0.76));
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(148, 163, 184, 0.22);
     }
 
-    @keyframes float {
+    .orb {
+      position: fixed;
+      border-radius: 999px;
+      filter: blur(70px);
+      opacity: 0.55;
+      pointer-events: none;
+      z-index: -2;
+      animation: drift 10s ease-in-out infinite alternate;
+    }
+
+    .orb-one {
+      width: 340px;
+      height: 340px;
+      background: #22d3ee;
+      left: -120px;
+      top: 80px;
+    }
+
+    .orb-two {
+      width: 420px;
+      height: 420px;
+      background: #7c3aed;
+      right: -150px;
+      top: 240px;
+      animation-delay: 1.5s;
+    }
+
+    .orb-three {
+      width: 300px;
+      height: 300px;
+      background: #2563eb;
+      left: 38%;
+      bottom: -130px;
+      animation-delay: 2.2s;
+    }
+
+    @keyframes drift {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      100% { transform: translate3d(30px, -30px, 0) scale(1.08); }
+    }
+
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      background-image:
+        linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+      background-size: 52px 52px;
+      mask-image: linear-gradient(to bottom, black, transparent 88%);
+    }
+
+    .mouse-glow {
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 999px;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.16), transparent 60%);
+      transform: translate(-50%, -50%);
+      z-index: -1;
+      transition: opacity 0.2s ease;
+    }
+
+    .float-slow {
+      animation: floatSlow 5.5s ease-in-out infinite;
+    }
+
+    .float-fast {
+      animation: floatFast 3.8s ease-in-out infinite;
+    }
+
+    @keyframes floatSlow {
+      0% { transform: translateY(0px) rotateX(0deg); }
+      50% { transform: translateY(-16px) rotateX(3deg); }
+      100% { transform: translateY(0px) rotateX(0deg); }
+    }
+
+    @keyframes floatFast {
       0% { transform: translateY(0px); }
-      50% { transform: translateY(-12px); }
+      50% { transform: translateY(-10px); }
       100% { transform: translateY(0px); }
     }
 
-    .pulse-glow {
-      box-shadow: 0 0 35px rgba(56, 189, 248, 0.35);
+    .tilt-card {
+      transform-style: preserve-3d;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .tilt-card:hover {
+      transform: perspective(1000px) rotateX(5deg) rotateY(-6deg) translateY(-8px);
+      box-shadow: 0 30px 80px rgba(14, 165, 233, 0.18);
+      border-color: rgba(56, 189, 248, 0.55);
+    }
+
+    .neon-text {
+      text-shadow: 0 0 30px rgba(56, 189, 248, 0.45);
+    }
+
+    .pulse-ring {
+      box-shadow:
+        0 0 0 0 rgba(34, 211, 238, 0.35),
+        0 0 35px rgba(34, 211, 238, 0.35);
+      animation: pulseRing 2.4s infinite;
+    }
+
+    @keyframes pulseRing {
+      0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.35), 0 0 35px rgba(34, 211, 238, 0.35); }
+      70% { box-shadow: 0 0 0 18px rgba(34, 211, 238, 0), 0 0 45px rgba(34, 211, 238, 0.45); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0), 0 0 35px rgba(34, 211, 238, 0.35); }
+    }
+
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(34, 211, 238, 0.9);
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.8);
+      animation: particleMove 9s linear infinite;
+    }
+
+    @keyframes particleMove {
+      0% { transform: translateY(0px); opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { transform: translateY(-280px); opacity: 0; }
+    }
+
+    .typing-dot {
+      width: 7px;
+      height: 7px;
+      background: white;
+      border-radius: 999px;
+      opacity: 0.45;
+      animation: typing 1.2s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes typing {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
+      40% { transform: translateY(-5px); opacity: 1; }
     }
   </style>
 </head>
 
-<body class="text-white min-h-screen overflow-x-hidden">
+<body class="text-white min-h-screen">
 
-  <div class="max-w-7xl mx-auto px-6 py-6">
+  <div class="grid-bg"></div>
+  <div class="orb orb-one"></div>
+  <div class="orb orb-two"></div>
+  <div class="orb orb-three"></div>
+  <div id="mouseGlow" class="mouse-glow"></div>
 
-    <nav class="flex justify-between items-center mb-16">
-      <a href="index.html" class="flex items-center gap-3">
-        <img src="assets/bookbotai-logo.png" class="h-14 w-auto rounded-xl" alt="BookBotAI Logo">
+  <div class="max-w-7xl mx-auto px-6 py-6 relative">
+
+    <nav class="flex justify-between items-center mb-14">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <img src="assets/bookbotai-logo.png" class="h-16 w-auto rounded-2xl group-hover:scale-105 transition" alt="BookBotAI Logo">
       </a>
 
-      <div class="hidden md:flex items-center gap-4 text-sm text-slate-300">
-        <a href="#features" class="hover:text-cyan-300">Features</a>
-        <a href="#demo" class="hover:text-cyan-300">Live Demo</a>
-        <a href="#automation" class="hover:text-cyan-300">Automation</a>
+      <div class="hidden md:flex items-center gap-8 text-sm text-slate-300 glass px-5 py-3 rounded-2xl">
+        <a href="#features" class="hover:text-cyan-300 transition">Features</a>
+        <a href="#experience" class="hover:text-cyan-300 transition">Experience</a>
+        <a href="#automation" class="hover:text-cyan-300 transition">Automation</a>
+        <a href="#demo" class="hover:text-cyan-300 transition">Demo</a>
       </div>
 
       <div class="flex gap-3">
-        <a href="login.html" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 transition">
+        <a href="login.html" class="px-5 py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 transition font-semibold border border-slate-700">
           Login
         </a>
 
-        <a href="register.html" class="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold transition">
-          Get Started
+        <a href="register.html" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-300 to-blue-500 hover:scale-105 text-slate-950 font-black transition pulse-ring">
+          Launch App
         </a>
       </div>
     </nav>
 
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center pt-8">
 
       <div>
-        <div class="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 px-4 py-2 rounded-full mb-6">
-          <span class="h-2 w-2 bg-cyan-300 rounded-full animate-ping"></span>
-          AI-powered booking automation
+        <div class="inline-flex items-center gap-3 glass px-4 py-2 rounded-full mb-7">
+          <span class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-300 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-cyan-300"></span>
+          </span>
+          <span class="text-cyan-200 font-semibold text-sm">Live AI booking workspace · by Neuriz Solutions</span>
         </div>
 
-        <h1 class="text-5xl md:text-7xl font-black leading-tight mb-6">
-          Turn bookings into a
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400">
-            conversation.
+        <h1 class="text-5xl md:text-7xl font-black leading-tight mb-7 neon-text">
+          Your bookings now have
+          <span class="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-blue-400 to-purple-400">
+            a brain.
           </span>
         </h1>
 
-        <p class="text-slate-300 text-lg md:text-xl mb-8 max-w-xl">
-          BookBotAI by Neuriz Solutions helps local businesses automate bookings, confirmations, cancellations, customer messages, and admin activity tracking.
+        <p class="text-slate-300 text-lg md:text-xl mb-9 max-w-xl leading-relaxed">
+          BookBotAI turns appointment booking into an interactive AI experience with live slot management, email automation, admin activity tracking, and customer dashboards.
         </p>
 
-        <div class="flex flex-wrap gap-4 mb-8">
-          <a href="register.html" class="bg-cyan-400 text-slate-950 px-6 py-4 rounded-2xl font-bold hover:scale-105 transition pulse-glow">
-            Start Free Demo
+        <div class="flex flex-wrap gap-4 mb-10">
+          <a href="register.html" class="bg-gradient-to-r from-cyan-300 to-blue-500 text-slate-950 px-7 py-4 rounded-2xl font-black hover:scale-105 transition shadow-2xl shadow-cyan-500/20">
+            Try the Live Demo
           </a>
 
-          <a href="login.html" class="bg-slate-800 px-6 py-4 rounded-2xl font-bold hover:bg-slate-700 hover:scale-105 transition">
-            Login Demo
+          <a href="login.html" class="bg-slate-800/90 border border-slate-700 px-7 py-4 rounded-2xl font-black hover:bg-slate-700 hover:scale-105 transition">
+            Open Dashboard
           </a>
         </div>
 
-        <div class="grid grid-cols-3 gap-4 max-w-xl">
-          <div class="glass border border-slate-700 rounded-2xl p-4">
-            <p class="text-3xl font-black text-cyan-300">24/7</p>
-            <p class="text-slate-400 text-sm">AI assistant</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
+          <div class="deep-glass rounded-3xl p-5 tilt-card">
+            <p class="text-4xl font-black text-cyan-300">AI</p>
+            <p class="text-slate-400 text-sm mt-1">Chat assistant</p>
           </div>
 
-          <div class="glass border border-slate-700 rounded-2xl p-4">
-            <p class="text-3xl font-black text-purple-300">0</p>
-            <p class="text-slate-400 text-sm">double bookings</p>
+          <div class="deep-glass rounded-3xl p-5 tilt-card">
+            <p class="text-4xl font-black text-purple-300">SMTP</p>
+            <p class="text-slate-400 text-sm mt-1">Email automation</p>
           </div>
 
-          <div class="glass border border-slate-700 rounded-2xl p-4">
-            <p class="text-3xl font-black text-blue-300">SMTP</p>
-            <p class="text-slate-400 text-sm">email alerts</p>
+          <div class="deep-glass rounded-3xl p-5 tilt-card">
+            <p class="text-4xl font-black text-green-300">0x</p>
+            <p class="text-slate-400 text-sm mt-1">Double booking</p>
           </div>
         </div>
       </div>
 
-      <div id="demo" class="relative">
-        <div class="absolute -inset-4 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-3xl blur opacity-25"></div>
+      <div id="demo" class="relative min-h-[620px]">
 
-        <div class="relative glass border border-slate-700 rounded-3xl p-6 float">
+        <div class="particle left-[12%] bottom-[10%]" style="animation-delay: 0s;"></div>
+        <div class="particle left-[76%] bottom-[5%]" style="animation-delay: 1.4s;"></div>
+        <div class="particle left-[48%] bottom-[15%]" style="animation-delay: 2.2s;"></div>
+        <div class="particle left-[88%] bottom-[25%]" style="animation-delay: 3.1s;"></div>
+
+        <div class="absolute -inset-6 bg-gradient-to-br from-cyan-500/20 to-purple-600/20 rounded-[40px] blur-2xl"></div>
+
+        <div class="relative deep-glass rounded-[36px] p-6 shadow-2xl float-slow">
 
           <div class="flex items-center justify-between mb-6">
             <div>
-              <p class="text-slate-400 text-sm">Live AI Preview</p>
-              <h2 class="text-2xl font-bold">Booking Chat</h2>
+              <p class="text-slate-400 text-sm">BookBotAI Control Room</p>
+              <h2 class="text-3xl font-black">Live Booking Experience</h2>
             </div>
 
-            <div class="bg-green-400/20 text-green-300 px-3 py-1 rounded-full text-sm">
-              Online
+            <div class="bg-green-400/15 text-green-300 px-4 py-2 rounded-2xl text-sm border border-green-400/30">
+              ● Online
             </div>
           </div>
 
-          <div class="space-y-4">
-            <div class="bg-slate-800 p-4 rounded-2xl rounded-tl-sm">
-              <p class="text-sm text-slate-400 mb-1">Customer</p>
-              <p>Do you have any slots after 7 PM tomorrow?</p>
+          <div class="grid grid-cols-3 gap-3 mb-6">
+            <div class="bg-slate-950/70 rounded-3xl p-4 border border-slate-800 hover:scale-105 transition">
+              <p class="text-slate-500 text-xs">Available</p>
+              <p class="text-3xl font-black text-cyan-300">06</p>
             </div>
 
-            <div class="bg-gradient-to-r from-cyan-500 to-blue-600 p-4 rounded-2xl rounded-tr-sm">
-              <p class="text-sm opacity-80 mb-1">BookBotAI</p>
-              <p>Yes! Slot ID 3 at 20:00 is available. You can book it from your dashboard.</p>
+            <div class="bg-slate-950/70 rounded-3xl p-4 border border-slate-800 hover:scale-105 transition">
+              <p class="text-slate-500 text-xs">Booked</p>
+              <p class="text-3xl font-black text-purple-300">12</p>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-              <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 hover:scale-105 transition">
-                <p class="text-slate-400 text-sm">Next slot</p>
-                <p class="text-xl font-bold">20:00</p>
+            <div class="bg-slate-950/70 rounded-3xl p-4 border border-slate-800 hover:scale-105 transition">
+              <p class="text-slate-500 text-xs">Emails</p>
+              <p class="text-3xl font-black text-green-300">ON</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-950/70 border border-slate-800 rounded-3xl p-5 mb-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="h-11 w-11 rounded-2xl bg-gradient-to-br from-cyan-300 to-blue-600 flex items-center justify-center text-slate-950 font-black">
+                AI
+              </div>
+              <div>
+                <p class="font-bold">AI Assistant</p>
+                <p class="text-xs text-slate-500">Understands booking questions</p>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <div class="bg-slate-800 rounded-2xl p-4 rounded-tl-sm">
+                <p class="text-xs text-slate-500 mb-1">Customer</p>
+                <p>Any slots available after 7 PM tomorrow?</p>
               </div>
 
-              <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 hover:scale-105 transition">
-                <p class="text-slate-400 text-sm">Email status</p>
-                <p class="text-xl font-bold text-green-300">Ready</p>
+              <div class="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl p-4 rounded-tr-sm">
+                <p class="text-xs opacity-80 mb-1">BookBotAI</p>
+                <p>Yes. Slot ID 3 at 20:00 is available. You can book it now from your dashboard.</p>
+              </div>
+
+              <div class="flex gap-2 items-center text-slate-400">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <span class="text-sm ml-2">preparing reminder automation...</span>
               </div>
             </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div class="bg-slate-950/70 border border-slate-800 rounded-3xl p-5 tilt-card">
+              <p class="text-slate-500 text-sm mb-2">Next confirmed booking</p>
+              <p class="text-2xl font-black">21:00</p>
+              <p class="text-slate-400">May 30 · Slot #8</p>
+              <div class="mt-4 h-2 rounded-full bg-slate-800 overflow-hidden">
+                <div class="h-full w-3/4 bg-gradient-to-r from-cyan-300 to-purple-400"></div>
+              </div>
+            </div>
+
+            <div class="bg-slate-950/70 border border-slate-800 rounded-3xl p-5 tilt-card">
+              <p class="text-slate-500 text-sm mb-2">Automation events</p>
+              <div class="space-y-2 text-sm">
+                <p>✅ Booking confirmed</p>
+                <p>✅ Email sent</p>
+                <p>✅ Admin notified</p>
+              </div>
+            </div>
+
           </div>
 
         </div>
+
+        <div class="absolute -left-6 top-24 deep-glass rounded-3xl p-4 shadow-2xl float-fast hidden md:block">
+          <p class="text-xs text-slate-400">Email status</p>
+          <p class="font-black text-green-300">Sent successfully</p>
+        </div>
+
+        <div class="absolute -right-5 bottom-24 deep-glass rounded-3xl p-4 shadow-2xl float-fast hidden md:block" style="animation-delay: 1.2s;">
+          <p class="text-xs text-slate-400">AI model</p>
+          <p class="font-black text-cyan-300">Groq powered</p>
+        </div>
+
       </div>
 
     </section>
 
-    <section id="features" class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-24">
-
-      <div class="glass border border-slate-700 rounded-3xl p-6 hover:-translate-y-2 transition">
-        <div class="text-4xl mb-4">🤖</div>
-        <h3 class="text-2xl font-bold mb-3">AI Chat Assistant</h3>
-        <p class="text-slate-400">
-          Customers can ask about available slots, booking options, cancellations, and timing preferences.
+    <section id="features" class="mt-28">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <p class="text-cyan-300 font-bold mb-3">FEATURES</p>
+        <h2 class="text-4xl md:text-5xl font-black mb-4">Everything feels interactive.</h2>
+        <p class="text-slate-400 text-lg">
+          Designed to feel like a modern AI control panel, not a boring booking form.
         </p>
       </div>
 
-      <div class="glass border border-slate-700 rounded-3xl p-6 hover:-translate-y-2 transition">
-        <div class="text-4xl mb-4">📅</div>
-        <h3 class="text-2xl font-bold mb-3">Smart Booking Flow</h3>
-        <p class="text-slate-400">
-          Slots update automatically so customers cannot double-book the same time.
-        </p>
-      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-      <div class="glass border border-slate-700 rounded-3xl p-6 hover:-translate-y-2 transition">
-        <div class="text-4xl mb-4">✉️</div>
-        <h3 class="text-2xl font-bold mb-3">Email Automation</h3>
-        <p class="text-slate-400">
-          Confirmation and cancellation emails are sent through Gmail SMTP automation.
-        </p>
-      </div>
-
-    </section>
-
-    <section id="automation" class="mt-24 glass border border-slate-700 rounded-3xl p-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-        <div>
-          <h2 class="text-4xl font-black mb-4">Automation that feels alive.</h2>
-          <p class="text-slate-400 text-lg">
-            Every booking creates admin activity, customer notifications, email confirmations, and AI-ready booking context.
+        <div class="deep-glass rounded-3xl p-7 tilt-card">
+          <div class="text-5xl mb-5">🤖</div>
+          <h3 class="text-2xl font-black mb-3">AI booking chat</h3>
+          <p class="text-slate-400 leading-relaxed">
+            Customers ask natural questions and the AI uses live slot data to reply.
           </p>
         </div>
 
-        <div class="space-y-3">
-          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">✅ Customer books a slot</div>
-          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">✅ Confirmation email sent</div>
-          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">✅ Admin activity updated</div>
-          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">✅ AI assistant sees live data</div>
+        <div class="deep-glass rounded-3xl p-7 tilt-card">
+          <div class="text-5xl mb-5">📅</div>
+          <h3 class="text-2xl font-black mb-3">Smart slot engine</h3>
+          <p class="text-slate-400 leading-relaxed">
+            Booking state updates instantly so the same slot cannot be double-booked.
+          </p>
         </div>
+
+        <div class="deep-glass rounded-3xl p-7 tilt-card">
+          <div class="text-5xl mb-5">⚡</div>
+          <h3 class="text-2xl font-black mb-3">Automation layer</h3>
+          <p class="text-slate-400 leading-relaxed">
+            Every booking triggers notifications, activity logs, and email confirmations.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="experience" class="mt-28 deep-glass rounded-[36px] p-8 md:p-10">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+
+        <div>
+          <p class="text-purple-300 font-bold mb-3">CUSTOMER EXPERIENCE</p>
+          <h2 class="text-4xl md:text-5xl font-black mb-5">
+            Bookings that feel like using a smart assistant.
+          </h2>
+          <p class="text-slate-400 text-lg leading-relaxed">
+            Customers can register, ask questions, book a slot, receive confirmation emails, cancel bookings, and view notifications from one futuristic dashboard.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <div class="bg-slate-950/70 border border-slate-800 rounded-3xl p-5 flex items-center gap-4 tilt-card">
+            <div class="h-12 w-12 rounded-2xl bg-cyan-400 text-slate-950 flex items-center justify-center font-black">1</div>
+            <div>
+              <p class="font-black">Ask AI about availability</p>
+              <p class="text-slate-400 text-sm">“What slots are free after 7 PM?”</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-950/70 border border-slate-800 rounded-3xl p-5 flex items-center gap-4 tilt-card">
+            <div class="h-12 w-12 rounded-2xl bg-blue-400 text-slate-950 flex items-center justify-center font-black">2</div>
+            <div>
+              <p class="font-black">Book instantly</p>
+              <p class="text-slate-400 text-sm">Slot becomes unavailable automatically.</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-950/70 border border-slate-800 rounded-3xl p-5 flex items-center gap-4 tilt-card">
+            <div class="h-12 w-12 rounded-2xl bg-purple-400 text-slate-950 flex items-center justify-center font-black">3</div>
+            <div>
+              <p class="font-black">Get confirmation email</p>
+              <p class="text-slate-400 text-sm">SMTP automation sends customer confirmation.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="automation" class="mt-28">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <p class="text-green-300 font-bold mb-3">AUTOMATION</p>
+        <h2 class="text-4xl md:text-5xl font-black mb-4">
+          The workflow runs itself.
+        </h2>
+        <p class="text-slate-400 text-lg">
+          BookBotAI already has the foundation for real SaaS automation.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+        <div class="deep-glass rounded-3xl p-5 tilt-card">
+          <p class="text-3xl mb-3">🧑</p>
+          <p class="font-black">Customer books</p>
+          <p class="text-slate-500 text-sm mt-1">User action captured</p>
+        </div>
+
+        <div class="deep-glass rounded-3xl p-5 tilt-card">
+          <p class="text-3xl mb-3">📬</p>
+          <p class="font-black">Email sent</p>
+          <p class="text-slate-500 text-sm mt-1">Gmail SMTP trigger</p>
+        </div>
+
+        <div class="deep-glass rounded-3xl p-5 tilt-card">
+          <p class="text-3xl mb-3">📊</p>
+          <p class="font-black">Admin updated</p>
+          <p class="text-slate-500 text-sm mt-1">Activity feed changes</p>
+        </div>
+
+        <div class="deep-glass rounded-3xl p-5 tilt-card">
+          <p class="text-3xl mb-3">🤖</p>
+          <p class="font-black">AI context refreshes</p>
+          <p class="text-slate-500 text-sm mt-1">Bot sees live data</p>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="mt-28 mb-20 deep-glass rounded-[36px] p-10 text-center">
+      <h2 class="text-4xl md:text-5xl font-black mb-5">
+        Ready to see BookBotAI in action?
+      </h2>
+      <p class="text-slate-400 text-lg mb-8">
+        Try the deployed demo and test booking, AI chat, email confirmations, and dashboards.
+      </p>
+
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="register.html" class="bg-gradient-to-r from-cyan-300 to-blue-500 text-slate-950 px-8 py-4 rounded-2xl font-black hover:scale-105 transition">
+          Create Demo Account
+        </a>
+
+        <a href="login.html" class="bg-slate-800 border border-slate-700 px-8 py-4 rounded-2xl font-black hover:bg-slate-700 hover:scale-105 transition">
+          Login
+        </a>
       </div>
     </section>
 
     <footer class="py-10 text-center text-slate-500">
-      BookBotAI by Neuriz Solutions · Built for modern local businesses
+      <div class="flex justify-center mb-4">
+        <img src="assets/bookbotai-logo.png" class="h-12 rounded-xl opacity-80" alt="BookBotAI Logo">
+      </div>
+      BookBotAI · by Neuriz Solutions · AI booking automation for modern local businesses
     </footer>
 
   </div>
+
+  <script>
+    const mouseGlow = document.getElementById("mouseGlow");
+
+    document.addEventListener("mousemove", function (event) {
+      mouseGlow.style.left = event.clientX + "px";
+      mouseGlow.style.top = event.clientY + "px";
+    });
+
+    const cards = document.querySelectorAll(".tilt-card");
+
+    for (let card of cards) {
+      card.addEventListener("mousemove", function (event) {
+        const rect = card.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = (y - centerY) / 22;
+        const rotateY = (centerX - x) / 22;
+
+        card.style.transform = "perspective(1000px) rotateX(" + rotateX + "deg) rotateY(" + rotateY + "deg) translateY(-8px)";
+      });
+
+      card.addEventListener("mouseleave", function () {
+        card.style.transform = "";
+      });
+    }
+  </script>
 
 </body>
 </html>
