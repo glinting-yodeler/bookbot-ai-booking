@@ -1,57 +1,84 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Register - BookBot</title>
+  <title>Register - BookBotAI</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(14, 165, 233, 0.22), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.20), transparent 30%),
+        #020617;
+    }
+
+    .glass {
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(18px);
+    }
+  </style>
 </head>
 
-<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center">
+<body class="text-white min-h-screen flex items-center justify-center px-6">
 
-  <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 w-full max-w-md">
+  <div class="w-full max-w-md">
 
-    <h1 class="text-3xl font-bold mb-2">Create Account</h1>
-    <p class="text-slate-400 mb-6">Register for BookBot AI Booking.</p>
+    <div class="text-center mb-8">
+      <a href="index.html">
+        <img src="assets/bookbotai-logo.png" class="h-20 mx-auto rounded-2xl" alt="BookBotAI Logo">
+      </a>
+    </div>
 
-    <input id="name" class="w-full mb-3 p-3 rounded-xl bg-slate-800 outline-none focus:ring-2 focus:ring-blue-600" placeholder="Full name">
+    <div class="glass border border-slate-700 p-8 rounded-3xl shadow-2xl">
 
-    <input id="email" class="w-full mb-3 p-3 rounded-xl bg-slate-800 outline-none focus:ring-2 focus:ring-blue-600" placeholder="Email">
+      <h1 class="text-4xl font-black mb-2">Create account</h1>
+      <p class="text-slate-400 mb-6">Start using BookBotAI by Neuriz Solutions.</p>
 
-    <input id="password" type="password" class="w-full mb-3 p-3 rounded-xl bg-slate-800 outline-none focus:ring-2 focus:ring-blue-600" placeholder="Password">
+      <input id="name" class="w-full mb-3 p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none focus:ring-2 focus:ring-cyan-400" placeholder="Full name">
 
-    <select id="role" class="w-full mb-4 p-3 rounded-xl bg-slate-800 outline-none focus:ring-2 focus:ring-blue-600">
-      <option value="customer">Customer</option>
-      <option value="admin">Admin</option>
-    </select>
+      <input id="email" class="w-full mb-3 p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none focus:ring-2 focus:ring-cyan-400" placeholder="Email">
 
-    <button onclick="register()" class="bg-blue-600 w-full py-3 rounded-xl font-semibold hover:bg-blue-500">
-      Register
-    </button>
+      <input id="password" type="password" class="w-full mb-3 p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none focus:ring-2 focus:ring-cyan-400" placeholder="Password">
 
-    <p id="status" class="text-slate-400 mt-4 text-center"></p>
+      <select id="role" class="w-full mb-4 p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none focus:ring-2 focus:ring-cyan-400">
+        <option value="customer">Customer</option>
+        <option value="admin">Admin</option>
+      </select>
 
-    <p class="text-slate-400 mt-5 text-center">
-      Already have an account?
-      <a href="login.html" class="text-blue-400">Login</a>
-    </p>
+      <button onclick="register()" class="bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 w-full py-4 rounded-2xl font-black hover:scale-105 transition">
+        Register
+      </button>
+
+      <p id="status" class="text-slate-400 mt-4 text-center"></p>
+
+      <p class="text-slate-400 mt-5 text-center">
+        Already have an account?
+        <a href="login.html" class="text-cyan-300 font-semibold">Login</a>
+      </p>
+
+    </div>
 
   </div>
 
   <script>
     const API = "https://bookbot-ai-booking.onrender.com";
 
+    function showStatus(message) {
+      document.getElementById("status").innerHTML = message;
+    }
+
     async function register() {
       const name = document.getElementById("name").value;
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       const role = document.getElementById("role").value;
-      const status = document.getElementById("status");
 
       if (name === "" || email === "" || password === "") {
-        alert("Please fill all fields");
+        showStatus("Please fill all fields.");
         return;
       }
 
-      status.innerHTML = "Creating account...";
+      showStatus("Creating account...");
 
       const url =
         API +
@@ -71,15 +98,16 @@
 
         const data = await response.json();
 
-        status.innerHTML = data.message;
-        alert(data.message);
+        showStatus(data.message);
 
         if (data.success === true) {
-          window.location.href = "login.html";
+          setTimeout(function () {
+            window.location.href = "login.html";
+          }, 700);
         }
+
       } catch (error) {
-        status.innerHTML = "Could not connect to backend.";
-        alert("Could not connect to backend.");
+        showStatus("Could not connect to backend.");
       }
     }
   </script>

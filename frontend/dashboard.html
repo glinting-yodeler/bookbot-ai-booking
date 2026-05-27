@@ -1,52 +1,84 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Customer Dashboard - BookBot</title>
+  <title>Customer Dashboard - BookBotAI</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(14, 165, 233, 0.20), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.20), transparent 30%),
+        #020617;
+    }
+
+    .glass {
+      background: rgba(15, 23, 42, 0.80);
+      backdrop-filter: blur(18px);
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 50;
+      animation: slideUp 0.25s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0px); opacity: 1; }
+    }
+  </style>
 </head>
 
-<body class="bg-slate-950 text-white min-h-screen">
+<body class="text-white min-h-screen">
 
-  <div class="max-w-6xl mx-auto p-6">
+  <div id="toastBox"></div>
 
-    <div class="flex justify-between items-center mb-8">
-      <div>
-        <h1 class="text-4xl font-bold">Customer Dashboard</h1>
-        <p id="welcome" class="text-slate-400 mt-1"></p>
+  <div class="max-w-7xl mx-auto p-6">
+
+    <div class="flex flex-col md:flex-row justify-between md:items-center gap-5 mb-8">
+      <div class="flex items-center gap-4">
+        <img src="assets/bookbotai-logo.png" class="h-16 rounded-2xl" alt="BookBotAI Logo">
+        <div>
+          <h1 class="text-4xl font-black">Customer Dashboard</h1>
+          <p id="welcome" class="text-slate-400 mt-1"></p>
+        </div>
       </div>
 
-      <button onclick="logout()" class="bg-red-600 px-4 py-2 rounded-xl hover:bg-red-500">
+      <button onclick="logout()" class="bg-red-500/90 px-5 py-3 rounded-2xl hover:bg-red-400 font-bold">
         Logout
       </button>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
-        <h2 class="text-2xl font-semibold mb-4">Available Slots</h2>
+      <div class="glass rounded-3xl p-6 border border-slate-700">
+        <h2 class="text-2xl font-black mb-4">Available Slots</h2>
 
-        <button onclick="loadSlots()" class="bg-blue-600 px-4 py-2 rounded-xl mb-4 hover:bg-blue-500">
+        <button onclick="loadSlots()" class="bg-cyan-400 text-slate-950 px-4 py-2 rounded-xl mb-4 font-bold hover:scale-105 transition">
           Refresh Slots
         </button>
 
         <div id="slots" class="space-y-3"></div>
       </div>
 
-      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
-        <h2 class="text-2xl font-semibold mb-4">My Bookings</h2>
+      <div class="glass rounded-3xl p-6 border border-slate-700">
+        <h2 class="text-2xl font-black mb-4">My Bookings</h2>
 
-        <button onclick="loadMyBookings()" class="bg-purple-600 px-4 py-2 rounded-xl mb-4 hover:bg-purple-500">
+        <button onclick="loadMyBookings()" class="bg-purple-500 px-4 py-2 rounded-xl mb-4 font-bold hover:scale-105 transition">
           Refresh Bookings
         </button>
 
         <div id="bookings" class="space-y-3"></div>
       </div>
 
-      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
-        <h2 class="text-2xl font-semibold mb-4">My Notifications</h2>
+      <div class="glass rounded-3xl p-6 border border-slate-700">
+        <h2 class="text-2xl font-black mb-4">My Notifications</h2>
 
-        <button onclick="loadCustomerNotifications()" class="bg-green-600 px-4 py-2 rounded-xl mb-4 hover:bg-green-500">
-          Refresh Notifications
+        <button onclick="loadCustomerNotifications()" class="bg-green-500 px-4 py-2 rounded-xl mb-4 font-bold hover:scale-105 transition">
+          Refresh
         </button>
 
         <div id="customerNotifications" class="space-y-3"></div>
@@ -54,20 +86,25 @@
 
     </div>
 
-    <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 mt-6">
-      <h2 class="text-2xl font-semibold mb-4">AI Chat Assistant</h2>
+    <div class="glass rounded-3xl p-6 border border-slate-700 mt-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-black">AI Chat Assistant</h2>
+        <span class="bg-green-400/20 text-green-300 px-3 py-1 rounded-full text-sm">Groq AI online</span>
+      </div>
 
-      <div id="chat" class="bg-slate-950 rounded-xl p-4 h-64 overflow-y-auto mb-3 text-slate-300 space-y-3">
-        <div class="bg-slate-800 rounded-xl p-3">
+      <div id="chat" class="bg-slate-950/70 rounded-3xl p-4 h-80 overflow-y-auto mb-4 text-slate-300 space-y-3 border border-slate-800">
+        <div class="bg-slate-800 rounded-2xl p-4 max-w-2xl">
           <p><b>Bot:</b> Hi, I can help you find and book slots. Ask me things like “what slots are available after 7 PM?”</p>
         </div>
       </div>
 
-      <input id="message" class="w-full mb-3 p-3 rounded-xl bg-slate-800 outline-none focus:ring-2 focus:ring-blue-600" placeholder="Ask: what slots are available after 7 PM?">
+      <div class="flex flex-col md:flex-row gap-3">
+        <input id="message" class="flex-1 p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none focus:ring-2 focus:ring-cyan-400" placeholder="Ask: what slots are available after 7 PM?">
 
-      <button onclick="sendMessage()" class="bg-blue-600 w-full py-3 rounded-xl font-semibold hover:bg-blue-500">
-        Send
-      </button>
+        <button onclick="sendMessage()" class="bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 px-8 py-4 rounded-2xl font-black hover:scale-105 transition">
+          Send
+        </button>
+      </div>
     </div>
 
   </div>
@@ -87,6 +124,30 @@
 
     document.getElementById("welcome").innerHTML = "Welcome, " + user.name + " (" + user.email + ")";
 
+    function showToast(message, type) {
+      const toastBox = document.getElementById("toastBox");
+
+      let color = "bg-slate-800 border-slate-600";
+
+      if (type === "success") {
+        color = "bg-green-900 border-green-500";
+      }
+
+      if (type === "error") {
+        color = "bg-red-900 border-red-500";
+      }
+
+      toastBox.innerHTML = `
+        <div class="toast ${color} border text-white px-5 py-4 rounded-2xl shadow-2xl max-w-md">
+          ${message}
+        </div>
+      `;
+
+      setTimeout(function () {
+        toastBox.innerHTML = "";
+      }, 4500);
+    }
+
     async function loadSlots() {
       const response = await fetch(API + "/available-slots");
       const data = await response.json();
@@ -95,10 +156,10 @@
 
       for (let slot of data) {
         html += `
-          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-            <p class="font-semibold">Slot ID: ${slot.id}</p>
+          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-[1.02] transition">
+            <p class="font-bold text-lg">Slot ID: ${slot.id}</p>
             <p class="text-slate-400">${slot.date} at ${slot.time}</p>
-            <button onclick="bookSlot(${slot.id})" class="mt-3 bg-green-600 px-4 py-2 rounded-xl hover:bg-green-500">
+            <button onclick="bookSlot(${slot.id})" class="mt-3 bg-green-500 px-4 py-2 rounded-xl font-bold hover:bg-green-400">
               Book This Slot
             </button>
           </div>
@@ -137,10 +198,14 @@
       let finalMessage = data.message;
 
       if (data.email_result) {
-        finalMessage = finalMessage + "\n\n" + buildEmailMessage(data);
+        finalMessage = finalMessage + "<br>" + buildEmailMessage(data);
       }
 
-      alert(finalMessage);
+      if (data.success === true) {
+        showToast(finalMessage, "success");
+      } else {
+        showToast(finalMessage, "error");
+      }
 
       console.log("Booking response:", data);
 
@@ -160,21 +225,21 @@
 
         if (booking.status === "confirmed") {
           cancelButton = `
-            <button onclick="cancelBooking(${booking.id})" class="mt-3 bg-red-600 px-4 py-2 rounded-xl hover:bg-red-500">
+            <button onclick="cancelBooking(${booking.id})" class="mt-3 bg-red-500 px-4 py-2 rounded-xl font-bold hover:bg-red-400">
               Cancel Booking
             </button>
           `;
         }
 
-        let statusColor = "text-green-400";
+        let statusColor = "text-green-300";
 
         if (booking.status === "cancelled") {
-          statusColor = "text-red-400";
+          statusColor = "text-red-300";
         }
 
         html += `
-          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-            <p class="font-semibold">${booking.date} at ${booking.time}</p>
+          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-[1.02] transition">
+            <p class="font-bold text-lg">${booking.date} at ${booking.time}</p>
             <p class="text-slate-400">Slot ID: ${booking.slot_id}</p>
             <p class="${statusColor}">Status: ${booking.status}</p>
             ${cancelButton}
@@ -196,13 +261,17 @@
 
       if (data.email_result) {
         if (data.email_result.success === true) {
-          finalMessage = finalMessage + "\n\nCancellation email sent to: " + data.email_result.to_email;
+          finalMessage = finalMessage + "<br>Cancellation email sent to: " + data.email_result.to_email;
         } else {
-          finalMessage = finalMessage + "\n\nCancellation saved, but email failed: " + data.email_result.message;
+          finalMessage = finalMessage + "<br>Cancellation saved, but email failed: " + data.email_result.message;
         }
       }
 
-      alert(finalMessage);
+      if (data.success === true) {
+        showToast(finalMessage, "success");
+      } else {
+        showToast(finalMessage, "error");
+      }
 
       console.log("Cancellation response:", data);
 
@@ -219,7 +288,7 @@
 
       for (let item of data) {
         html += `
-          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
             <p class="font-semibold">${item.message}</p>
             <p class="text-slate-400 text-sm">${item.created_at}</p>
           </div>
@@ -239,13 +308,13 @@
       }
 
       chat.innerHTML += `
-        <div class="bg-blue-600 rounded-xl p-3">
+        <div class="bg-blue-600 rounded-2xl p-4 ml-auto max-w-2xl">
           <p><b>You:</b> ${message}</p>
         </div>
       `;
 
       chat.innerHTML += `
-        <div id="typing" class="bg-slate-800 rounded-xl p-3">
+        <div id="typing" class="bg-slate-800 rounded-2xl p-4 max-w-2xl">
           <p><b>Bot:</b> Thinking...</p>
         </div>
       `;
@@ -273,7 +342,7 @@
         }
 
         chat.innerHTML += `
-          <div class="bg-slate-800 rounded-xl p-3">
+          <div class="bg-slate-800 rounded-2xl p-4 max-w-2xl">
             <p><b>Bot:</b> ${data.reply}</p>
           </div>
         `;
@@ -286,7 +355,7 @@
         }
 
         chat.innerHTML += `
-          <div class="bg-red-900 rounded-xl p-3">
+          <div class="bg-red-900 rounded-2xl p-4 max-w-2xl">
             <p><b>Bot:</b> Could not reach AI assistant.</p>
           </div>
         `;
