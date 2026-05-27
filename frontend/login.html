@@ -5,65 +5,351 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
+      margin: 0;
+      overflow-x: hidden;
+      background: #010208;
+      color: white;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .space {
+      position: fixed;
+      inset: 0;
+      z-index: -30;
       background:
-        radial-gradient(circle at top left, rgba(14, 165, 233, 0.22), transparent 30%),
-        radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.20), transparent 30%),
-        #020617;
+        radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.10), transparent 24%),
+        radial-gradient(circle at 82% 18%, rgba(124, 58, 237, 0.13), transparent 26%),
+        radial-gradient(circle at 50% 90%, rgba(37, 99, 235, 0.08), transparent 26%),
+        linear-gradient(180deg, #02030a 0%, #010208 50%, #000000 100%);
+    }
+
+    .vignette {
+      position: fixed;
+      inset: 0;
+      z-index: -24;
+      background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.22) 52%, rgba(0,0,0,0.85) 100%);
+      pointer-events: none;
+    }
+
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: -25;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 999px;
+      background: white;
+      opacity: 0.5;
+      animation: twinkle linear infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.12; transform: scale(0.75); }
+      50% { opacity: 0.85; transform: scale(1.15); }
+    }
+
+    .comet {
+      position: fixed;
+      width: 180px;
+      height: 2px;
+      z-index: -20;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent, rgba(96,165,250,0.9), rgba(168,85,247,0.65), transparent);
+      box-shadow: 0 0 14px rgba(59,130,246,0.7);
+      transform: rotate(-28deg);
+      opacity: 0;
+      animation: cometFly 9s linear infinite;
+    }
+
+    .comet.two {
+      animation-delay: 4s;
+      top: 30%;
+    }
+
+    @keyframes cometFly {
+      0% {
+        left: -20%;
+        top: 16%;
+        opacity: 0;
+      }
+
+      8% {
+        opacity: 0.8;
+      }
+
+      28% {
+        opacity: 0.8;
+      }
+
+      42% {
+        left: 120%;
+        top: 78%;
+        opacity: 0;
+      }
+
+      100% {
+        left: 120%;
+        opacity: 0;
+      }
+    }
+
+    .mouse-aura {
+      position: fixed;
+      width: 340px;
+      height: 340px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(59,130,246,0.13), rgba(168,85,247,0.05), transparent 68%);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: -10;
+      filter: blur(10px);
     }
 
     .glass {
-      background: rgba(15, 23, 42, 0.78);
+      background: rgba(6, 10, 22, 0.74);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      backdrop-filter: blur(22px);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 28px 90px rgba(0,0,0,0.45);
+    }
+
+    .soft-glass {
+      background: rgba(5, 8, 18, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.12);
       backdrop-filter: blur(18px);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 18px 50px rgba(0,0,0,0.36);
+    }
+
+    .auth-card {
+      transform-style: preserve-3d;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .auth-card:hover {
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 30px 100px rgba(59,130,246,0.14);
+    }
+
+    .glow-text {
+      text-shadow: 0 0 24px rgba(96,165,250,0.18);
+    }
+
+    .input-field {
+      background: rgba(2, 6, 23, 0.72);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .input-field:focus {
+      border-color: rgba(34, 211, 238, 0.75);
+      box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.10), 0 0 30px rgba(34, 211, 238, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .scanline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(34,211,238,0.55), transparent);
+      animation: scan 4.5s ease-in-out infinite;
+      opacity: 0.4;
+    }
+
+    @keyframes scan {
+      0% { top: 10%; opacity: 0; }
+      20% { opacity: 0.45; }
+      70% { opacity: 0.45; }
+      100% { top: 90%; opacity: 0; }
+    }
+
+    .small-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #67e8f9;
+      box-shadow: 0 0 16px rgba(103,232,249,0.8);
+    }
+
+    .status-box {
+      min-height: 28px;
     }
   </style>
 </head>
 
-<body class="text-white min-h-screen flex items-center justify-center px-6">
+<body class="min-h-screen flex items-center justify-center px-6 py-10">
 
-  <div class="w-full max-w-md">
+  <div class="space"></div>
+  <div class="vignette"></div>
+  <div id="stars"></div>
+  <div class="comet"></div>
+  <div class="comet two"></div>
+  <div id="mouseAura" class="mouse-aura"></div>
 
-    <div class="text-center mb-8">
+  <div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+
+    <div class="hidden lg:block">
       <a href="index.html">
-        <img src="assets/bookbotai-logo.png" class="h-20 mx-auto rounded-2xl" alt="BookBotAI Logo">
+        <img src="assets/bookbotai-logo.png" class="h-20 rounded-3xl mb-10 soft-glass p-2" alt="BookBotAI Logo">
       </a>
-    </div>
 
-    <div class="glass border border-slate-700 p-8 rounded-3xl shadow-2xl">
-
-      <h1 class="text-4xl font-black mb-2">Welcome back</h1>
-      <p class="text-slate-400 mb-6">Login to your AI booking workspace.</p>
-
-      <input id="email" class="w-full mb-3 p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none focus:ring-2 focus:ring-cyan-400" placeholder="Email">
-
-      <input id="password" type="password" class="w-full mb-4 p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none focus:ring-2 focus:ring-cyan-400" placeholder="Password">
-
-      <button onclick="login()" class="bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 w-full py-4 rounded-2xl font-black hover:scale-105 transition">
-        Login
-      </button>
-
-      <p id="status" class="text-slate-400 mt-4 text-center"></p>
-
-      <p class="text-slate-400 mt-5 text-center">
-        No account?
-        <a href="register.html" class="text-cyan-300 font-semibold">Register</a>
-      </p>
-
-      <div class="bg-slate-800 mt-6 p-4 rounded-2xl text-sm text-slate-300 border border-slate-700">
-        <p class="font-bold mb-1 text-white">Demo Admin Login</p>
-        <p>Email: admin@bookbot.com</p>
-        <p>Password: admin123</p>
+      <div class="inline-flex items-center gap-3 soft-glass rounded-full px-5 py-3 mb-7">
+        <span class="small-dot"></span>
+        <span class="text-cyan-100 font-semibold">Secure AI booking workspace</span>
       </div>
 
+      <h1 class="text-6xl font-black leading-[0.95] tracking-[-0.06em] mb-6 glow-text">
+        Enter the
+        <span class="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-blue-400 to-purple-400">
+          control room.
+        </span>
+      </h1>
+
+      <p class="text-slate-500 text-xl leading-relaxed max-w-lg mb-8">
+        Login to manage bookings, chat with AI, trigger email confirmations, and control the BookBotAI automation system.
+      </p>
+
+      <div class="grid grid-cols-3 gap-4 max-w-xl">
+        <div class="soft-glass rounded-3xl p-5">
+          <p class="text-3xl font-black text-cyan-200">AI</p>
+          <p class="text-slate-500 text-sm">Assistant</p>
+        </div>
+
+        <div class="soft-glass rounded-3xl p-5">
+          <p class="text-3xl font-black text-violet-300">SMTP</p>
+          <p class="text-slate-500 text-sm">Emails</p>
+        </div>
+
+        <div class="soft-glass rounded-3xl p-5">
+          <p class="text-3xl font-black text-emerald-300">Live</p>
+          <p class="text-slate-500 text-sm">Slots</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="authCard" class="auth-card glass rounded-[36px] p-8 md:p-10 relative overflow-hidden">
+      <div class="scanline"></div>
+
+      <div class="lg:hidden flex justify-center mb-8">
+        <a href="index.html">
+          <img src="assets/bookbotai-logo.png" class="h-20 rounded-3xl soft-glass p-2" alt="BookBotAI Logo">
+        </a>
+      </div>
+
+      <div class="relative z-10">
+        <div class="flex justify-between items-start mb-8">
+          <div>
+            <p class="text-slate-500 mb-2">BookBotAI Access</p>
+            <h1 class="text-5xl font-black tracking-[-0.06em]">Login</h1>
+          </div>
+
+          <div class="soft-glass rounded-3xl px-4 py-3 text-emerald-300 font-black text-sm">
+            ● Online
+          </div>
+        </div>
+
+        <label class="text-slate-400 text-sm font-semibold">Email</label>
+        <input id="email" class="input-field w-full mt-2 mb-4 p-4 rounded-2xl outline-none text-white" placeholder="admin@bookbot.com">
+
+        <label class="text-slate-400 text-sm font-semibold">Password</label>
+        <input id="password" type="password" class="input-field w-full mt-2 mb-5 p-4 rounded-2xl outline-none text-white" placeholder="Enter password">
+
+        <button onclick="login()" class="w-full rounded-3xl px-6 py-4 bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400 text-slate-950 font-black hover:scale-[1.02] transition shadow-2xl shadow-blue-500/10">
+          Enter Dashboard
+        </button>
+
+        <p id="status" class="status-box text-slate-400 mt-5 text-center"></p>
+
+        <div class="soft-glass rounded-3xl p-5 mt-6">
+          <p class="font-black mb-2">Demo Admin</p>
+          <div class="grid grid-cols-1 gap-2 text-sm text-slate-400">
+            <p>Email: <span class="text-slate-200">admin@bookbot.com</span></p>
+            <p>Password: <span class="text-slate-200">admin123</span></p>
+          </div>
+
+          <button onclick="fillAdmin()" class="mt-4 w-full rounded-2xl px-4 py-3 bg-slate-900/80 border border-slate-700 hover:border-cyan-300/50 transition font-bold">
+            Autofill Admin Login
+          </button>
+        </div>
+
+        <p class="text-slate-500 mt-6 text-center">
+          No account?
+          <a href="register.html" class="text-cyan-200 font-bold hover:text-cyan-100">Create one</a>
+        </p>
+      </div>
     </div>
 
   </div>
 
   <script>
     const API = "https://bookbot-ai-booking.onrender.com";
+    const stars = document.getElementById("stars");
+    const mouseAura = document.getElementById("mouseAura");
+    const authCard = document.getElementById("authCard");
+
+    for (let i = 0; i < 140; i++) {
+      const star = document.createElement("div");
+      star.className = "star";
+
+      const size = Math.random() * 2.2 + 0.8;
+      star.style.width = size + "px";
+      star.style.height = size + "px";
+      star.style.left = Math.random() * 100 + "%";
+      star.style.top = Math.random() * 100 + "%";
+      star.style.animationDuration = (Math.random() * 4 + 2) + "s";
+      star.style.animationDelay = (Math.random() * 4) + "s";
+
+      if (Math.random() > 0.88) {
+        star.style.boxShadow = "0 0 10px rgba(147,197,253,0.9), 0 0 22px rgba(168,85,247,0.35)";
+      }
+
+      stars.appendChild(star);
+    }
+
+    document.addEventListener("mousemove", function (event) {
+      mouseAura.style.left = event.clientX + "px";
+      mouseAura.style.top = event.clientY + "px";
+    });
+
+    authCard.addEventListener("mousemove", function (event) {
+      const rect = authCard.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const rotateX = (y - centerY) / 34;
+      const rotateY = (centerX - x) / 34;
+
+      authCard.style.transform =
+        "perspective(1000px) rotateX(" + rotateX + "deg) rotateY(" + rotateY + "deg)";
+    });
+
+    authCard.addEventListener("mouseleave", function () {
+      authCard.style.transform = "";
+    });
 
     function showStatus(message) {
       document.getElementById("status").innerHTML = message;
+    }
+
+    function fillAdmin() {
+      document.getElementById("email").value = "admin@bookbot.com";
+      document.getElementById("password").value = "admin123";
+      showStatus("Admin credentials loaded.");
     }
 
     async function login() {
@@ -75,7 +361,7 @@
         return;
       }
 
-      showStatus("Logging in...");
+      showStatus("Authenticating...");
 
       const url =
         API +
@@ -97,8 +383,7 @@
         }
 
         localStorage.setItem("bookbot_user", JSON.stringify(data.user));
-
-        showStatus("Login successful. Redirecting...");
+        showStatus("Access granted. Redirecting...");
 
         setTimeout(function () {
           if (data.user.role === "admin") {
@@ -106,7 +391,7 @@
           } else {
             window.location.href = "dashboard.html";
           }
-        }, 600);
+        }, 700);
 
       } catch (error) {
         showStatus("Could not connect to backend.");
