@@ -2,6 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
 import hashlib
+import os
+from dotenv import load_dotenv
+from groq import Groq
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -101,6 +106,11 @@ def home():
     return {
         "message": "BookBot backend is running"
     }
+
+
+@app.head("/")
+def health_check():
+    return
 
 
 @app.post("/register")
@@ -488,3 +498,81 @@ def chat(message: str):
     return {
         "reply": "Hi, I am BookBot. I can help you view slots, book a slot, or cancel a booking."
     }
+
+
+@app.post("/ai-chat")
+def ai_chat(user_id: int, message: str):
+    try:
+        groq_key = os.getenv("GROQ_API_KEY")
+
+        if groq_key is None or groq_key == "":
+            return {
+                "success": False,
+                "reply": "Groq API key is missing. Please add GROQ_API_KEY in your .env file or Render environment variables.",
+                "error": "Missing GROQ_API_KEY"
+            }
+
+        available_slots = get_available_slots()
+        user_bookings = get_my_bookings(user_id)
+
+        system_prompt = """
+You are BookBot, a helpful AI booking assistant for a local booking SaaS.
+
+Your job:
+- Help users understand available slots.
+- Recommend suitable slots.
+- Explain how to book.
+- Explain how to cancel.
+- Answer only using the booking data given to you.
+
+Rules:
+- Do not invent slots.
+- Do not say a slot exists unless it appears in available_slots.
+- If the user wants to book, tell them the exact Slot ID they should click.
+- If the user wants to cancel, tell them to use the cancel button in My Bookings.
+- Keep replies short and practical.
+"""
+
+        data_context = f"""
+Available slots:
+{available_slots}
+
+User bookings:
+{user_bookings}
+"""
+
+        groq_client = Groq(api_key=groq_key)
+
+        completion = groq_client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
+                    "role": "user",
+                    "content": data_context
+                },
+                {
+                    "role": "user",
+                    "content": message
+                }
+            ],
+            temperature=0.3,
+            max_tokens=300
+        )
+
+        reply = completion.choices[0].message.content
+
+        return {
+            "success": True,
+            "reply": reply
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "reply": "AI assistant is unavailable right now. Please try again later.",
+            "error": str(e)
+        }

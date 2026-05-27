@@ -15,7 +15,7 @@
         <p id="welcome" class="text-slate-400 mt-1"></p>
       </div>
 
-      <button onclick="logout()" class="bg-red-600 px-4 py-2 rounded-xl">
+      <button onclick="logout()" class="bg-red-600 px-4 py-2 rounded-xl hover:bg-red-500">
         Logout
       </button>
     </div>
@@ -24,17 +24,21 @@
 
       <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
         <h2 class="text-2xl font-semibold mb-4">Available Slots</h2>
-        <button onclick="loadSlots()" class="bg-blue-600 px-4 py-2 rounded-xl mb-4">
+
+        <button onclick="loadSlots()" class="bg-blue-600 px-4 py-2 rounded-xl mb-4 hover:bg-blue-500">
           Refresh Slots
         </button>
+
         <div id="slots" class="space-y-3"></div>
       </div>
 
       <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
         <h2 class="text-2xl font-semibold mb-4">My Bookings</h2>
-        <button onclick="loadMyBookings()" class="bg-purple-600 px-4 py-2 rounded-xl mb-4">
+
+        <button onclick="loadMyBookings()" class="bg-purple-600 px-4 py-2 rounded-xl mb-4 hover:bg-purple-500">
           Refresh Bookings
         </button>
+
         <div id="bookings" class="space-y-3"></div>
       </div>
 
@@ -43,13 +47,15 @@
     <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 mt-6">
       <h2 class="text-2xl font-semibold mb-4">AI Chat Assistant</h2>
 
-      <div id="chat" class="bg-slate-950 rounded-xl p-4 h-56 overflow-y-auto mb-3 text-slate-300">
-        <p><b>Bot:</b> Hi, I can help you find and book slots.</p>
+      <div id="chat" class="bg-slate-950 rounded-xl p-4 h-64 overflow-y-auto mb-3 text-slate-300 space-y-3">
+        <div class="bg-slate-800 rounded-xl p-3">
+          <p><b>Bot:</b> Hi, I can help you find and book slots. Ask me things like “what slots are available after 7 PM?”</p>
+        </div>
       </div>
 
-      <input id="message" class="w-full mb-3 p-3 rounded-xl bg-slate-800" placeholder="Ask: what slots are available?">
+      <input id="message" class="w-full mb-3 p-3 rounded-xl bg-slate-800 outline-none focus:ring-2 focus:ring-blue-600" placeholder="Ask: what slots are available after 7 PM?">
 
-      <button onclick="sendMessage()" class="bg-blue-600 w-full py-3 rounded-xl font-semibold">
+      <button onclick="sendMessage()" class="bg-blue-600 w-full py-3 rounded-xl font-semibold hover:bg-blue-500">
         Send
       </button>
     </div>
@@ -82,7 +88,7 @@
           <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
             <p class="font-semibold">Slot ID: ${slot.id}</p>
             <p class="text-slate-400">${slot.date} at ${slot.time}</p>
-            <button onclick="bookSlot(${slot.id})" class="mt-3 bg-green-600 px-4 py-2 rounded-xl">
+            <button onclick="bookSlot(${slot.id})" class="mt-3 bg-green-600 px-4 py-2 rounded-xl hover:bg-green-500">
               Book This Slot
             </button>
           </div>
@@ -123,17 +129,23 @@
 
         if (booking.status === "confirmed") {
           cancelButton = `
-            <button onclick="cancelBooking(${booking.id})" class="mt-3 bg-red-600 px-4 py-2 rounded-xl">
+            <button onclick="cancelBooking(${booking.id})" class="mt-3 bg-red-600 px-4 py-2 rounded-xl hover:bg-red-500">
               Cancel Booking
             </button>
           `;
+        }
+
+        let statusColor = "text-green-400";
+
+        if (booking.status === "cancelled") {
+          statusColor = "text-red-400";
         }
 
         html += `
           <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
             <p class="font-semibold">${booking.date} at ${booking.time}</p>
             <p class="text-slate-400">Slot ID: ${booking.slot_id}</p>
-            <p class="text-green-400">Status: ${booking.status}</p>
+            <p class="${statusColor}">Status: ${booking.status}</p>
             ${cancelButton}
           </div>
         `;
@@ -156,27 +168,70 @@
     }
 
     async function sendMessage() {
-      const message = document.getElementById("message").value;
+      const messageInput = document.getElementById("message");
+      const message = messageInput.value;
+      const chat = document.getElementById("chat");
 
       if (message === "") {
         return;
       }
 
+      chat.innerHTML += `
+        <div class="bg-blue-600 rounded-xl p-3">
+          <p><b>You:</b> ${message}</p>
+        </div>
+      `;
+
+      chat.innerHTML += `
+        <div id="typing" class="bg-slate-800 rounded-xl p-3">
+          <p><b>Bot:</b> Thinking...</p>
+        </div>
+      `;
+
+      chat.scrollTop = chat.scrollHeight;
+
       const url =
         API +
-        "/chat?message=" +
+        "/ai-chat?user_id=" +
+        encodeURIComponent(user.id) +
+        "&message=" +
         encodeURIComponent(message);
 
-      const response = await fetch(url, {
-        method: "POST"
-      });
+      try {
+        const response = await fetch(url, {
+          method: "POST"
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      document.getElementById("chat").innerHTML += `<p><b>You:</b> ${message}</p>`;
-      document.getElementById("chat").innerHTML += `<p><b>Bot:</b> ${data.reply}</p>`;
+        const typing = document.getElementById("typing");
 
-      document.getElementById("message").value = "";
+        if (typing) {
+          typing.remove();
+        }
+
+        chat.innerHTML += `
+          <div class="bg-slate-800 rounded-xl p-3">
+            <p><b>Bot:</b> ${data.reply}</p>
+          </div>
+        `;
+
+      } catch (error) {
+        const typing = document.getElementById("typing");
+
+        if (typing) {
+          typing.remove();
+        }
+
+        chat.innerHTML += `
+          <div class="bg-red-900 rounded-xl p-3">
+            <p><b>Bot:</b> Could not reach AI assistant.</p>
+          </div>
+        `;
+      }
+
+      messageInput.value = "";
+      chat.scrollTop = chat.scrollHeight;
     }
 
     function logout() {
