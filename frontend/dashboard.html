@@ -5,108 +5,435 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
+    * {
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
     body {
+      margin: 0;
+      overflow-x: hidden;
+      background: #010208;
+      color: white;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .space {
+      position: fixed;
+      inset: 0;
+      z-index: -30;
       background:
-        radial-gradient(circle at top left, rgba(14, 165, 233, 0.20), transparent 30%),
-        radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.20), transparent 30%),
-        #020617;
+        radial-gradient(circle at 18% 20%, rgba(14, 165, 233, 0.10), transparent 24%),
+        radial-gradient(circle at 82% 18%, rgba(124, 58, 237, 0.13), transparent 26%),
+        radial-gradient(circle at 50% 88%, rgba(37, 99, 235, 0.08), transparent 26%),
+        linear-gradient(180deg, #02030a 0%, #010208 52%, #000000 100%);
+    }
+
+    .vignette {
+      position: fixed;
+      inset: 0;
+      z-index: -24;
+      background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.25) 52%, rgba(0,0,0,0.86) 100%);
+      pointer-events: none;
+    }
+
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: -25;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 999px;
+      background: white;
+      opacity: 0.5;
+      animation: twinkle linear infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.12; transform: scale(0.75); }
+      50% { opacity: 0.85; transform: scale(1.15); }
+    }
+
+    .comet {
+      position: fixed;
+      width: 180px;
+      height: 2px;
+      z-index: -20;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent, rgba(96,165,250,0.9), rgba(168,85,247,0.65), transparent);
+      box-shadow: 0 0 14px rgba(59,130,246,0.7);
+      transform: rotate(-28deg);
+      opacity: 0;
+      animation: cometFly 10s linear infinite;
+    }
+
+    .comet.two {
+      animation-delay: 4s;
+      top: 30%;
+    }
+
+    @keyframes cometFly {
+      0% {
+        left: -20%;
+        top: 16%;
+        opacity: 0;
+      }
+
+      8% {
+        opacity: 0.8;
+      }
+
+      28% {
+        opacity: 0.8;
+      }
+
+      42% {
+        left: 120%;
+        top: 78%;
+        opacity: 0;
+      }
+
+      100% {
+        left: 120%;
+        opacity: 0;
+      }
+    }
+
+    .mouse-aura {
+      position: fixed;
+      width: 340px;
+      height: 340px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(59,130,246,0.13), rgba(168,85,247,0.05), transparent 68%);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: -10;
+      filter: blur(10px);
     }
 
     .glass {
-      background: rgba(15, 23, 42, 0.80);
+      background: rgba(6, 10, 22, 0.74);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      backdrop-filter: blur(22px);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 28px 90px rgba(0,0,0,0.45);
+    }
+
+    .soft-glass {
+      background: rgba(5, 8, 18, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.12);
       backdrop-filter: blur(18px);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 18px 50px rgba(0,0,0,0.36);
+    }
+
+    .thin-panel {
+      background: rgba(3, 6, 15, 0.62);
+      border: 1px solid rgba(148, 163, 184, 0.13);
+      backdrop-filter: blur(14px);
+    }
+
+    .tilt {
+      transform-style: preserve-3d;
+      transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .tilt:hover {
+      border-color: rgba(96,165,250,0.36);
+      box-shadow: 0 24px 70px rgba(59,130,246,0.12);
+    }
+
+    .hero-title {
+      letter-spacing: -0.06em;
+      line-height: 0.95;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, #dbeafe, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #67e8f9;
+      box-shadow: 0 0 16px rgba(103,232,249,0.8);
     }
 
     .toast {
       position: fixed;
       right: 24px;
       bottom: 24px;
-      z-index: 50;
+      z-index: 60;
       animation: slideUp 0.25s ease-out;
+      max-width: 420px;
     }
 
     @keyframes slideUp {
       from { transform: translateY(20px); opacity: 0; }
       to { transform: translateY(0px); opacity: 1; }
     }
+
+    .chat-window {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(96,165,250,0.5) rgba(15,23,42,0.4);
+    }
+
+    .scanline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(34,211,238,0.5), transparent);
+      animation: scan 4.5s ease-in-out infinite;
+      opacity: 0.35;
+    }
+
+    @keyframes scan {
+      0% { top: 8%; opacity: 0; }
+      20% { opacity: 0.42; }
+      70% { opacity: 0.42; }
+      100% { top: 92%; opacity: 0; }
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, rgba(30,41,59,0.6), rgba(51,65,85,0.7), rgba(30,41,59,0.6));
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+    }
+
+    @keyframes shimmer {
+      from { background-position: 200% 0; }
+      to { background-position: -200% 0; }
+    }
+
+    .typing-dot {
+      width: 7px;
+      height: 7px;
+      background: white;
+      border-radius: 999px;
+      opacity: 0.45;
+      animation: typing 1.2s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes typing {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
+      40% { transform: translateY(-5px); opacity: 1; }
+    }
+
+    .sidebar-link {
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .sidebar-link:hover {
+      background: rgba(15,23,42,0.8);
+      transform: translateX(4px);
+    }
+
+    @media (max-width: 1024px) {
+      .desktop-sidebar {
+        display: none;
+      }
+    }
   </style>
 </head>
 
-<body class="text-white min-h-screen">
-
+<body>
+  <div class="space"></div>
+  <div class="vignette"></div>
+  <div id="stars"></div>
+  <div class="comet"></div>
+  <div class="comet two"></div>
+  <div id="mouseAura" class="mouse-aura"></div>
   <div id="toastBox"></div>
 
-  <div class="max-w-7xl mx-auto p-6">
+  <div class="max-w-[1500px] mx-auto px-5 py-5">
 
-    <div class="flex flex-col md:flex-row justify-between md:items-center gap-5 mb-8">
-      <div class="flex items-center gap-4">
-        <img src="assets/bookbotai-logo.png" class="h-16 rounded-2xl" alt="BookBotAI Logo">
-        <div>
-          <h1 class="text-4xl font-black">Customer Dashboard</h1>
-          <p id="welcome" class="text-slate-400 mt-1"></p>
+    <div class="grid grid-cols-1 lg:grid-cols-[270px_1fr] gap-5">
+
+      <aside class="desktop-sidebar glass rounded-[32px] p-5 h-[calc(100vh-40px)] sticky top-5 overflow-hidden relative">
+        <div class="scanline"></div>
+
+        <div class="relative z-10">
+          <a href="index.html">
+            <img src="assets/bookbotai-logo.png" class="h-16 rounded-2xl mb-8" alt="BookBotAI Logo">
+          </a>
+
+          <div class="soft-glass rounded-3xl p-4 mb-6">
+            <p class="text-slate-500 text-sm">Signed in as</p>
+            <p id="sidebarName" class="font-black text-lg"></p>
+            <p id="sidebarEmail" class="text-slate-500 text-xs mt-1 break-all"></p>
+          </div>
+
+          <nav class="space-y-3">
+            <a href="#slotsPanel" class="sidebar-link block rounded-2xl px-4 py-3 text-slate-300 font-semibold">📅 Available Slots</a>
+            <a href="#bookingsPanel" class="sidebar-link block rounded-2xl px-4 py-3 text-slate-300 font-semibold">✅ My Bookings</a>
+            <a href="#notificationsPanel" class="sidebar-link block rounded-2xl px-4 py-3 text-slate-300 font-semibold">🔔 Notifications</a>
+            <a href="#chatPanel" class="sidebar-link block rounded-2xl px-4 py-3 text-slate-300 font-semibold">🤖 AI Assistant</a>
+          </nav>
+
+          <button onclick="logout()" class="absolute bottom-5 left-5 right-5 bg-red-500/90 rounded-3xl px-5 py-4 font-black hover:bg-red-400 transition">
+            Logout
+          </button>
         </div>
-      </div>
+      </aside>
 
-      <button onclick="logout()" class="bg-red-500/90 px-5 py-3 rounded-2xl hover:bg-red-400 font-bold">
-        Logout
-      </button>
+      <main>
+
+        <header class="glass rounded-[32px] p-6 md:p-8 mb-5 relative overflow-hidden">
+          <div class="scanline"></div>
+
+          <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div class="inline-flex items-center gap-3 thin-panel rounded-full px-5 py-3 mb-5">
+                <span class="status-dot"></span>
+                <span class="text-cyan-100 font-semibold">Customer Control Room</span>
+              </div>
+
+              <h1 class="hero-title text-5xl md:text-7xl font-black mb-4">
+                Welcome back,
+                <span id="firstName" class="gradient-text block"></span>
+              </h1>
+
+              <p class="text-slate-500 text-lg max-w-2xl">
+                Book slots, talk to the AI assistant, receive email confirmations, and track your booking notifications in one futuristic workspace.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 min-w-full md:min-w-[430px]">
+              <div class="soft-glass rounded-3xl p-4 tilt">
+                <p class="text-slate-500 text-sm">Available</p>
+                <p id="statAvailable" class="text-3xl font-black text-cyan-200">0</p>
+              </div>
+
+              <div class="soft-glass rounded-3xl p-4 tilt">
+                <p class="text-slate-500 text-sm">Bookings</p>
+                <p id="statBookings" class="text-3xl font-black text-violet-300">0</p>
+              </div>
+
+              <div class="soft-glass rounded-3xl p-4 tilt">
+                <p class="text-slate-500 text-sm">Alerts</p>
+                <p id="statAlerts" class="text-3xl font-black text-emerald-300">0</p>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <section class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+
+          <div id="slotsPanel" class="glass rounded-[32px] p-6 xl:col-span-1 relative overflow-hidden">
+            <div class="scanline"></div>
+
+            <div class="relative z-10">
+              <div class="flex items-center justify-between mb-5">
+                <div>
+                  <p class="text-slate-500 text-sm">Choose your time</p>
+                  <h2 class="text-3xl font-black tracking-[-0.04em]">Available Slots</h2>
+                </div>
+
+                <button onclick="loadSlots()" class="soft-glass rounded-2xl px-4 py-3 font-bold hover:scale-105 transition">
+                  Refresh
+                </button>
+              </div>
+
+              <div id="slots" class="space-y-4"></div>
+            </div>
+          </div>
+
+          <div id="chatPanel" class="glass rounded-[32px] p-6 xl:col-span-2 relative overflow-hidden">
+            <div class="scanline"></div>
+
+            <div class="relative z-10">
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+                <div>
+                  <p class="text-slate-500 text-sm">Groq-powered assistant</p>
+                  <h2 class="text-3xl font-black tracking-[-0.04em]">AI Booking Chat</h2>
+                </div>
+
+                <div class="thin-panel rounded-2xl px-4 py-3 text-emerald-300 font-black text-sm">
+                  ● Online
+                </div>
+              </div>
+
+              <div id="chat" class="chat-window bg-black/30 border border-slate-800 rounded-[28px] p-5 h-[460px] overflow-y-auto mb-4 space-y-4">
+                <div class="max-w-2xl soft-glass rounded-3xl p-5 rounded-tl-sm">
+                  <p class="text-xs text-slate-500 mb-1">BookBotAI</p>
+                  <p>Hi! Ask me things like “what slots are available after 7 PM?” or “which slot should I book tomorrow?”</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
+                <input id="message" onkeydown="handleChatKey(event)" class="w-full p-4 rounded-3xl bg-slate-950/70 border border-slate-800 outline-none focus:border-cyan-300/70 focus:ring-4 focus:ring-cyan-300/10 transition" placeholder="Ask BookBotAI about slots, bookings, or cancellations...">
+
+                <button onclick="sendMessage()" class="rounded-3xl px-8 py-4 bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400 text-slate-950 font-black hover:scale-105 transition">
+                  Send
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <section class="grid grid-cols-1 xl:grid-cols-2 gap-5 mt-5">
+
+          <div id="bookingsPanel" class="glass rounded-[32px] p-6 relative overflow-hidden">
+            <div class="scanline"></div>
+
+            <div class="relative z-10">
+              <div class="flex items-center justify-between mb-5">
+                <div>
+                  <p class="text-slate-500 text-sm">Your timeline</p>
+                  <h2 class="text-3xl font-black tracking-[-0.04em]">My Bookings</h2>
+                </div>
+
+                <button onclick="loadMyBookings()" class="soft-glass rounded-2xl px-4 py-3 font-bold hover:scale-105 transition">
+                  Refresh
+                </button>
+              </div>
+
+              <div id="bookings" class="space-y-4"></div>
+            </div>
+          </div>
+
+          <div id="notificationsPanel" class="glass rounded-[32px] p-6 relative overflow-hidden">
+            <div class="scanline"></div>
+
+            <div class="relative z-10">
+              <div class="flex items-center justify-between mb-5">
+                <div>
+                  <p class="text-slate-500 text-sm">System messages</p>
+                  <h2 class="text-3xl font-black tracking-[-0.04em]">Notifications</h2>
+                </div>
+
+                <button onclick="loadCustomerNotifications()" class="soft-glass rounded-2xl px-4 py-3 font-bold hover:scale-105 transition">
+                  Refresh
+                </button>
+              </div>
+
+              <div id="customerNotifications" class="space-y-4"></div>
+            </div>
+          </div>
+
+        </section>
+
+      </main>
     </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-      <div class="glass rounded-3xl p-6 border border-slate-700">
-        <h2 class="text-2xl font-black mb-4">Available Slots</h2>
-
-        <button onclick="loadSlots()" class="bg-cyan-400 text-slate-950 px-4 py-2 rounded-xl mb-4 font-bold hover:scale-105 transition">
-          Refresh Slots
-        </button>
-
-        <div id="slots" class="space-y-3"></div>
-      </div>
-
-      <div class="glass rounded-3xl p-6 border border-slate-700">
-        <h2 class="text-2xl font-black mb-4">My Bookings</h2>
-
-        <button onclick="loadMyBookings()" class="bg-purple-500 px-4 py-2 rounded-xl mb-4 font-bold hover:scale-105 transition">
-          Refresh Bookings
-        </button>
-
-        <div id="bookings" class="space-y-3"></div>
-      </div>
-
-      <div class="glass rounded-3xl p-6 border border-slate-700">
-        <h2 class="text-2xl font-black mb-4">My Notifications</h2>
-
-        <button onclick="loadCustomerNotifications()" class="bg-green-500 px-4 py-2 rounded-xl mb-4 font-bold hover:scale-105 transition">
-          Refresh
-        </button>
-
-        <div id="customerNotifications" class="space-y-3"></div>
-      </div>
-
-    </div>
-
-    <div class="glass rounded-3xl p-6 border border-slate-700 mt-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-2xl font-black">AI Chat Assistant</h2>
-        <span class="bg-green-400/20 text-green-300 px-3 py-1 rounded-full text-sm">Groq AI online</span>
-      </div>
-
-      <div id="chat" class="bg-slate-950/70 rounded-3xl p-4 h-80 overflow-y-auto mb-4 text-slate-300 space-y-3 border border-slate-800">
-        <div class="bg-slate-800 rounded-2xl p-4 max-w-2xl">
-          <p><b>Bot:</b> Hi, I can help you find and book slots. Ask me things like “what slots are available after 7 PM?”</p>
-        </div>
-      </div>
-
-      <div class="flex flex-col md:flex-row gap-3">
-        <input id="message" class="flex-1 p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none focus:ring-2 focus:ring-cyan-400" placeholder="Ask: what slots are available after 7 PM?">
-
-        <button onclick="sendMessage()" class="bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 px-8 py-4 rounded-2xl font-black hover:scale-105 transition">
-          Send
-        </button>
-      </div>
-    </div>
-
   </div>
 
   <script>
@@ -122,51 +449,106 @@
       window.location.href = "admin.html";
     }
 
-    document.getElementById("welcome").innerHTML = "Welcome, " + user.name + " (" + user.email + ")";
+    const firstName = user.name.split(" ")[0];
+
+    document.getElementById("firstName").innerHTML = firstName;
+    document.getElementById("sidebarName").innerHTML = user.name;
+    document.getElementById("sidebarEmail").innerHTML = user.email;
+
+    const stars = document.getElementById("stars");
+    const mouseAura = document.getElementById("mouseAura");
+
+    for (let i = 0; i < 160; i++) {
+      const star = document.createElement("div");
+      star.className = "star";
+
+      const size = Math.random() * 2.2 + 0.8;
+      star.style.width = size + "px";
+      star.style.height = size + "px";
+      star.style.left = Math.random() * 100 + "%";
+      star.style.top = Math.random() * 100 + "%";
+      star.style.animationDuration = (Math.random() * 4 + 2) + "s";
+      star.style.animationDelay = (Math.random() * 4) + "s";
+
+      if (Math.random() > 0.88) {
+        star.style.boxShadow = "0 0 10px rgba(147,197,253,0.9), 0 0 22px rgba(168,85,247,0.35)";
+      }
+
+      stars.appendChild(star);
+    }
+
+    document.addEventListener("mousemove", function (event) {
+      mouseAura.style.left = event.clientX + "px";
+      mouseAura.style.top = event.clientY + "px";
+    });
 
     function showToast(message, type) {
       const toastBox = document.getElementById("toastBox");
 
-      let color = "bg-slate-800 border-slate-600";
+      let color = "bg-slate-950 border-slate-700";
 
       if (type === "success") {
-        color = "bg-green-900 border-green-500";
+        color = "bg-emerald-950 border-emerald-500/70";
       }
 
       if (type === "error") {
-        color = "bg-red-900 border-red-500";
+        color = "bg-red-950 border-red-500/70";
       }
 
       toastBox.innerHTML = `
-        <div class="toast ${color} border text-white px-5 py-4 rounded-2xl shadow-2xl max-w-md">
+        <div class="toast ${color} border text-white px-5 py-4 rounded-3xl shadow-2xl">
           ${message}
         </div>
       `;
 
       setTimeout(function () {
         toastBox.innerHTML = "";
-      }, 4500);
+      }, 5200);
+    }
+
+    function setLoadingSlots() {
+      document.getElementById("slots").innerHTML = `
+        <div class="skeleton rounded-3xl h-32"></div>
+        <div class="skeleton rounded-3xl h-32"></div>
+        <div class="skeleton rounded-3xl h-32"></div>
+      `;
     }
 
     async function loadSlots() {
+      setLoadingSlots();
+
       const response = await fetch(API + "/available-slots");
       const data = await response.json();
+
+      document.getElementById("statAvailable").innerHTML = data.length;
 
       let html = "";
 
       for (let slot of data) {
         html += `
-          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-[1.02] transition">
-            <p class="font-bold text-lg">Slot ID: ${slot.id}</p>
-            <p class="text-slate-400">${slot.date} at ${slot.time}</p>
-            <button onclick="bookSlot(${slot.id})" class="mt-3 bg-green-500 px-4 py-2 rounded-xl font-bold hover:bg-green-400">
-              Book This Slot
+          <div class="soft-glass rounded-3xl p-5 tilt">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-slate-500 text-sm">Slot ID ${slot.id}</p>
+              <span class="text-emerald-300 text-sm font-bold">Available</span>
+            </div>
+
+            <p class="text-2xl font-black">${slot.time}</p>
+            <p class="text-slate-500">${slot.date}</p>
+
+            <button onclick="bookSlot(${slot.id})" class="mt-4 w-full rounded-2xl px-4 py-3 bg-emerald-400 text-slate-950 font-black hover:scale-[1.02] transition">
+              Book Slot
             </button>
           </div>
         `;
       }
 
-      document.getElementById("slots").innerHTML = html || "<p>No available slots.</p>";
+      document.getElementById("slots").innerHTML = html || `
+        <div class="soft-glass rounded-3xl p-6 text-center text-slate-500">
+          No available slots right now.
+        </div>
+      `;
+
+      attachTilt();
     }
 
     function buildEmailMessage(data) {
@@ -182,6 +564,8 @@
     }
 
     async function bookSlot(slotId) {
+      showToast("Booking slot #" + slotId + "...", "success");
+
       const url =
         API +
         "/bookings?user_id=" +
@@ -214,43 +598,71 @@
       loadCustomerNotifications();
     }
 
+    function setLoadingBookings() {
+      document.getElementById("bookings").innerHTML = `
+        <div class="skeleton rounded-3xl h-28"></div>
+        <div class="skeleton rounded-3xl h-28"></div>
+      `;
+    }
+
     async function loadMyBookings() {
+      setLoadingBookings();
+
       const response = await fetch(API + "/my-bookings/" + user.id);
       const data = await response.json();
+
+      document.getElementById("statBookings").innerHTML = data.length;
 
       let html = "";
 
       for (let booking of data) {
         let cancelButton = "";
+        let statusColor = "text-emerald-300";
+        let statusBadge = "bg-emerald-400/10 border-emerald-400/30";
 
         if (booking.status === "confirmed") {
           cancelButton = `
-            <button onclick="cancelBooking(${booking.id})" class="mt-3 bg-red-500 px-4 py-2 rounded-xl font-bold hover:bg-red-400">
+            <button onclick="cancelBooking(${booking.id})" class="mt-4 rounded-2xl px-4 py-3 bg-red-500 text-white font-black hover:bg-red-400 transition">
               Cancel Booking
             </button>
           `;
         }
 
-        let statusColor = "text-green-300";
-
         if (booking.status === "cancelled") {
           statusColor = "text-red-300";
+          statusBadge = "bg-red-400/10 border-red-400/30";
         }
 
         html += `
-          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-[1.02] transition">
-            <p class="font-bold text-lg">${booking.date} at ${booking.time}</p>
-            <p class="text-slate-400">Slot ID: ${booking.slot_id}</p>
-            <p class="${statusColor}">Status: ${booking.status}</p>
+          <div class="soft-glass rounded-3xl p-5 tilt">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-2xl font-black">${booking.date}</p>
+                <p class="text-slate-500">${booking.time} · Slot ID ${booking.slot_id}</p>
+              </div>
+
+              <div class="${statusBadge} border rounded-2xl px-3 py-2 ${statusColor} font-bold text-sm">
+                ${booking.status}
+              </div>
+            </div>
+
             ${cancelButton}
           </div>
         `;
       }
 
-      document.getElementById("bookings").innerHTML = html || "<p>No bookings yet.</p>";
+      document.getElementById("bookings").innerHTML = html || `
+        <div class="soft-glass rounded-3xl p-6 text-center text-slate-500">
+          No bookings yet. Pick a slot to start.
+        </div>
+      `;
+
+      attachTilt();
     }
 
     async function cancelBooking(bookingId) {
+      showToast("Cancelling booking #" + bookingId + "...", "success");
+
       const response = await fetch(API + "/bookings/" + bookingId, {
         method: "DELETE"
       });
@@ -280,22 +692,45 @@
       loadCustomerNotifications();
     }
 
+    function setLoadingNotifications() {
+      document.getElementById("customerNotifications").innerHTML = `
+        <div class="skeleton rounded-3xl h-24"></div>
+        <div class="skeleton rounded-3xl h-24"></div>
+      `;
+    }
+
     async function loadCustomerNotifications() {
+      setLoadingNotifications();
+
       const response = await fetch(API + "/customer-notifications/" + user.id);
       const data = await response.json();
+
+      document.getElementById("statAlerts").innerHTML = data.length;
 
       let html = "";
 
       for (let item of data) {
         html += `
-          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-            <p class="font-semibold">${item.message}</p>
-            <p class="text-slate-400 text-sm">${item.created_at}</p>
+          <div class="soft-glass rounded-3xl p-5 tilt">
+            <p class="font-bold">${item.message}</p>
+            <p class="text-slate-500 text-sm mt-2">${item.created_at}</p>
           </div>
         `;
       }
 
-      document.getElementById("customerNotifications").innerHTML = html || "<p>No notifications yet.</p>";
+      document.getElementById("customerNotifications").innerHTML = html || `
+        <div class="soft-glass rounded-3xl p-6 text-center text-slate-500">
+          No notifications yet.
+        </div>
+      `;
+
+      attachTilt();
+    }
+
+    function handleChatKey(event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
     }
 
     async function sendMessage() {
@@ -303,19 +738,26 @@
       const message = messageInput.value;
       const chat = document.getElementById("chat");
 
-      if (message === "") {
+      if (message.trim() === "") {
         return;
       }
 
       chat.innerHTML += `
-        <div class="bg-blue-600 rounded-2xl p-4 ml-auto max-w-2xl">
-          <p><b>You:</b> ${message}</p>
+        <div class="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-3xl p-5 ml-auto max-w-2xl rounded-tr-sm">
+          <p class="text-xs opacity-80 mb-1">You</p>
+          <p>${message}</p>
         </div>
       `;
 
       chat.innerHTML += `
-        <div id="typing" class="bg-slate-800 rounded-2xl p-4 max-w-2xl">
-          <p><b>Bot:</b> Thinking...</p>
+        <div id="typing" class="soft-glass rounded-3xl p-5 max-w-2xl rounded-tl-sm">
+          <p class="text-xs text-slate-500 mb-2">BookBotAI</p>
+          <div class="flex items-center gap-2">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <span class="text-slate-500 text-sm ml-2">thinking with live booking data...</span>
+          </div>
         </div>
       `;
 
@@ -342,8 +784,9 @@
         }
 
         chat.innerHTML += `
-          <div class="bg-slate-800 rounded-2xl p-4 max-w-2xl">
-            <p><b>Bot:</b> ${data.reply}</p>
+          <div class="soft-glass rounded-3xl p-5 max-w-2xl rounded-tl-sm">
+            <p class="text-xs text-slate-500 mb-1">BookBotAI</p>
+            <p>${data.reply}</p>
           </div>
         `;
 
@@ -355,14 +798,39 @@
         }
 
         chat.innerHTML += `
-          <div class="bg-red-900 rounded-2xl p-4 max-w-2xl">
-            <p><b>Bot:</b> Could not reach AI assistant.</p>
+          <div class="bg-red-950 border border-red-500/50 rounded-3xl p-5 max-w-2xl">
+            <p><b>BookBotAI:</b> Could not reach AI assistant.</p>
           </div>
         `;
       }
 
       messageInput.value = "";
       chat.scrollTop = chat.scrollHeight;
+    }
+
+    function attachTilt() {
+      const tiltCards = document.querySelectorAll(".tilt");
+
+      for (let card of tiltCards) {
+        card.onmousemove = function (event) {
+          const rect = card.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+
+          const rotateX = (y - centerY) / 26;
+          const rotateY = (centerX - x) / 26;
+
+          card.style.transform =
+            "perspective(900px) rotateX(" + rotateX + "deg) rotateY(" + rotateY + "deg) translateY(-4px)";
+        };
+
+        card.onmouseleave = function () {
+          card.style.transform = "";
+        };
+      }
     }
 
     function logout() {
@@ -373,6 +841,7 @@
     loadSlots();
     loadMyBookings();
     loadCustomerNotifications();
+    attachTilt();
   </script>
 
 </body>
