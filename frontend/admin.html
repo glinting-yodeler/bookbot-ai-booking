@@ -5,118 +5,375 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    body {
-      background:
-        radial-gradient(circle at top left, rgba(14, 165, 233, 0.20), transparent 30%),
-        radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.20), transparent 30%),
-        #020617;
+    * {
+      box-sizing: border-box;
+      scroll-behavior: smooth;
     }
 
-    .glass {
-      background: rgba(15, 23, 42, 0.80);
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      background: #010208;
+      color: white;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .space {
+      position: fixed;
+      inset: 0;
+      z-index: -30;
+      background:
+        radial-gradient(circle at 16% 18%, rgba(14,165,233,0.09), transparent 25%),
+        radial-gradient(circle at 80% 12%, rgba(124,58,237,0.11), transparent 27%),
+        radial-gradient(circle at 60% 90%, rgba(37,99,235,0.07), transparent 25%),
+        linear-gradient(180deg, #02030a 0%, #010208 55%, #000 100%);
+    }
+
+    .vignette {
+      position: fixed;
+      inset: 0;
+      z-index: -24;
+      background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.28) 55%, rgba(0,0,0,0.9) 100%);
+      pointer-events: none;
+    }
+
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: -25;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 999px;
+      background: white;
+      opacity: 0.45;
+      animation: twinkle linear infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.12; transform: scale(0.75); }
+      50% { opacity: 0.85; transform: scale(1.12); }
+    }
+
+    .comet {
+      position: fixed;
+      width: 190px;
+      height: 2px;
+      z-index: -20;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent, rgba(96,165,250,0.8), rgba(168,85,247,0.55), transparent);
+      box-shadow: 0 0 14px rgba(59,130,246,0.65);
+      transform: rotate(-28deg);
+      opacity: 0;
+      animation: cometFly 11s linear infinite;
+    }
+
+    .comet.two {
+      animation-delay: 4s;
+      top: 28%;
+    }
+
+    @keyframes cometFly {
+      0% { left: -20%; top: 16%; opacity: 0; }
+      8% { opacity: 0.75; }
+      30% { opacity: 0.75; }
+      45% { left: 120%; top: 78%; opacity: 0; }
+      100% { left: 120%; opacity: 0; }
+    }
+
+    .mouse-aura {
+      position: fixed;
+      width: 360px;
+      height: 360px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(59,130,246,0.12), rgba(168,85,247,0.04), transparent 68%);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: -10;
+      filter: blur(10px);
+    }
+
+    .surface {
+      background: rgba(5, 9, 20, 0.54);
       backdrop-filter: blur(18px);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.32);
+    }
+
+    .surface-soft {
+      background: rgba(5, 9, 20, 0.44);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.26);
+    }
+
+    .nav-item {
+      color: rgb(148 163 184);
+      transition: 0.2s ease;
+    }
+
+    .nav-item:hover {
+      color: white;
+      transform: translateX(4px);
+    }
+
+    .stat-card {
+      background: rgba(2,6,23,0.38);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(148,163,184,0.07);
+      transition: 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(96,165,250,0.25);
+      box-shadow: 0 18px 50px rgba(59,130,246,0.10);
+    }
+
+    .floating-card {
+      background: linear-gradient(145deg, rgba(8,13,28,0.72), rgba(3,6,15,0.52));
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(148,163,184,0.08);
+      transition: 0.2s ease;
+    }
+
+    .floating-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(96,165,250,0.28);
+      box-shadow: 0 24px 80px rgba(59,130,246,0.12);
+    }
+
+    .title {
+      letter-spacing: -0.065em;
+      line-height: 0.92;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, #dbeafe, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .pill {
+      background: rgba(2,6,23,0.42);
+      border: 1px solid rgba(148,163,184,0.09);
+      backdrop-filter: blur(12px);
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 60;
+      animation: slideUp 0.25s ease-out;
+      max-width: 420px;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0px); opacity: 1; }
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, rgba(30,41,59,0.32), rgba(51,65,85,0.45), rgba(30,41,59,0.32));
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+    }
+
+    @keyframes shimmer {
+      from { background-position: 200% 0; }
+      to { background-position: -200% 0; }
+    }
+
+    .input-field {
+      background: rgba(2,6,23,0.48);
+      border: 1px solid rgba(148,163,184,0.10);
+      transition: 0.2s ease;
+    }
+
+    .input-field:focus {
+      border-color: rgba(34,211,238,0.65);
+      box-shadow: 0 0 0 4px rgba(34,211,238,0.08);
+    }
+
+    @media (max-width: 1024px) {
+      .sidebar {
+        display: none;
+      }
     }
   </style>
 </head>
 
-<body class="text-white min-h-screen">
+<body>
+  <div class="space"></div>
+  <div class="vignette"></div>
+  <div id="stars"></div>
+  <div class="comet"></div>
+  <div class="comet two"></div>
+  <div id="mouseAura" class="mouse-aura"></div>
+  <div id="toastBox"></div>
 
-  <div class="max-w-7xl mx-auto p-6">
+  <div class="max-w-[1550px] mx-auto px-5 py-5">
+    <div class="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-6">
 
-    <div class="flex flex-col md:flex-row justify-between md:items-center gap-5 mb-8">
-      <div class="flex items-center gap-4">
-        <img src="assets/bookbotai-logo.png" class="h-16 rounded-2xl" alt="BookBotAI Logo">
-        <div>
-          <h1 class="text-4xl font-black">Admin Dashboard</h1>
-          <p id="welcome" class="text-slate-400 mt-1"></p>
+      <aside class="sidebar min-h-[calc(100vh-40px)] sticky top-5 flex flex-col">
+        <a href="index.html" class="mb-10">
+          <img src="assets/bookbotai-logo.png" class="h-16 rounded-2xl" alt="BookBotAI Logo">
+        </a>
+
+        <div class="mb-10">
+          <p class="text-slate-600 text-sm mb-2">Admin mode</p>
+          <p id="sidebarName" class="text-white font-black text-xl"></p>
+          <p id="sidebarEmail" class="text-slate-500 text-sm break-all mt-1"></p>
         </div>
-      </div>
 
-      <button onclick="logout()" class="bg-red-500/90 px-5 py-3 rounded-2xl hover:bg-red-400 font-bold">
-        Logout
-      </button>
-    </div>
+        <nav class="space-y-5 text-lg font-bold">
+          <a href="#analyticsPanel" class="nav-item flex items-center gap-3">📊 Analytics</a>
+          <a href="#slotControl" class="nav-item flex items-center gap-3">📅 Slot Control</a>
+          <a href="#activityPanel" class="nav-item flex items-center gap-3">⚡ Activity Feed</a>
+          <a href="#bookingsPanel" class="nav-item flex items-center gap-3">✅ Bookings</a>
+        </nav>
 
-    <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
-
-      <div class="glass p-5 rounded-3xl border border-slate-700 hover:scale-105 transition">
-        <p class="text-slate-400">Customers</p>
-        <h2 id="totalCustomers" class="text-3xl font-black text-cyan-300">0</h2>
-      </div>
-
-      <div class="glass p-5 rounded-3xl border border-slate-700 hover:scale-105 transition">
-        <p class="text-slate-400">Total Slots</p>
-        <h2 id="totalSlots" class="text-3xl font-black text-blue-300">0</h2>
-      </div>
-
-      <div class="glass p-5 rounded-3xl border border-slate-700 hover:scale-105 transition">
-        <p class="text-slate-400">Available</p>
-        <h2 id="availableSlots" class="text-3xl font-black text-green-300">0</h2>
-      </div>
-
-      <div class="glass p-5 rounded-3xl border border-slate-700 hover:scale-105 transition">
-        <p class="text-slate-400">Confirmed</p>
-        <h2 id="confirmedBookings" class="text-3xl font-black text-purple-300">0</h2>
-      </div>
-
-      <div class="glass p-5 rounded-3xl border border-slate-700 hover:scale-105 transition">
-        <p class="text-slate-400">Cancelled</p>
-        <h2 id="cancelledBookings" class="text-3xl font-black text-red-300">0</h2>
-      </div>
-
-      <div class="glass p-5 rounded-3xl border border-slate-700 hover:scale-105 transition">
-        <p class="text-slate-400">Activity</p>
-        <h2 id="totalNotifications" class="text-3xl font-black text-yellow-300">0</h2>
-      </div>
-
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-      <div class="glass rounded-3xl p-6 border border-slate-700">
-        <h2 class="text-2xl font-black mb-4">Add Slot</h2>
-
-        <input id="date" class="w-full mb-3 p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none focus:ring-2 focus:ring-cyan-400" placeholder="Date e.g. 2026-05-29">
-
-        <input id="time" class="w-full mb-3 p-4 rounded-2xl bg-slate-800 border border-slate-700 outline-none focus:ring-2 focus:ring-cyan-400" placeholder="Time e.g. 21:00">
-
-        <button onclick="addSlot()" class="bg-yellow-400 text-slate-950 w-full py-4 rounded-2xl font-black hover:scale-105 transition">
-          Add Slot
+        <button onclick="logout()" class="mt-auto bg-red-500/90 rounded-3xl px-5 py-4 font-black hover:bg-red-400 transition">
+          Logout
         </button>
-      </div>
+      </aside>
 
-      <div class="glass rounded-3xl p-6 border border-slate-700 md:col-span-2">
-        <h2 class="text-2xl font-black mb-4">All Slots</h2>
+      <main>
+        <header class="mb-10 px-2 pt-6">
+          <div class="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
+            <div>
+              <div class="inline-flex items-center gap-3 pill rounded-full px-5 py-3 mb-7">
+                <span class="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_16px_rgba(103,232,249,0.8)]"></span>
+                <span class="text-cyan-100 font-semibold">Admin Command Center</span>
+              </div>
 
-        <button onclick="loadSlots()" class="bg-cyan-400 text-slate-950 px-4 py-2 rounded-xl mb-4 font-bold hover:scale-105 transition">
-          Refresh Slots
-        </button>
+              <h1 class="title text-6xl md:text-8xl font-black mb-5">
+                System
+                <span class="gradient-text block">Control Room</span>
+              </h1>
 
-        <div id="slots" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-      </div>
+              <p class="text-slate-500 text-xl max-w-3xl leading-relaxed">
+                Manage slots, bookings, cancellations, customer actions, and automation events from one clean admin cockpit.
+              </p>
+            </div>
 
+            <div class="stat-card rounded-3xl p-6 min-w-full xl:min-w-[420px]">
+              <p class="text-slate-500 text-sm">Current System Status</p>
+              <div class="flex items-center justify-between mt-2">
+                <p class="text-4xl font-black text-emerald-300">Operational</p>
+                <span class="pill rounded-2xl px-4 py-3 text-emerald-300 font-black text-sm">● Live</span>
+              </div>
+              <p class="text-slate-600 text-sm mt-2">Backend, AI, SMTP, and dashboards are connected.</p>
+            </div>
+          </div>
+        </header>
+
+        <section id="analyticsPanel" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4 mb-5">
+          <div class="stat-card rounded-3xl p-5">
+            <p class="text-slate-500 text-sm">Customers</p>
+            <h2 id="totalCustomers" class="text-4xl font-black text-cyan-200">0</h2>
+          </div>
+
+          <div class="stat-card rounded-3xl p-5">
+            <p class="text-slate-500 text-sm">Total Slots</p>
+            <h2 id="totalSlots" class="text-4xl font-black text-blue-300">0</h2>
+          </div>
+
+          <div class="stat-card rounded-3xl p-5">
+            <p class="text-slate-500 text-sm">Available</p>
+            <h2 id="availableSlots" class="text-4xl font-black text-emerald-300">0</h2>
+          </div>
+
+          <div class="stat-card rounded-3xl p-5">
+            <p class="text-slate-500 text-sm">Confirmed</p>
+            <h2 id="confirmedBookings" class="text-4xl font-black text-violet-300">0</h2>
+          </div>
+
+          <div class="stat-card rounded-3xl p-5">
+            <p class="text-slate-500 text-sm">Cancelled</p>
+            <h2 id="cancelledBookings" class="text-4xl font-black text-red-300">0</h2>
+          </div>
+
+          <div class="stat-card rounded-3xl p-5">
+            <p class="text-slate-500 text-sm">Activity</p>
+            <h2 id="totalNotifications" class="text-4xl font-black text-yellow-300">0</h2>
+          </div>
+        </section>
+
+        <section id="slotControl" class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+          <div class="surface rounded-[34px] p-6">
+            <div class="mb-6">
+              <p class="text-slate-600 text-sm">Create availability</p>
+              <h2 class="text-4xl font-black tracking-[-0.05em]">Add Slot</h2>
+            </div>
+
+            <label class="text-slate-500 text-sm font-semibold">Date</label>
+            <input id="date" class="input-field w-full mt-2 mb-4 p-4 rounded-2xl outline-none" placeholder="2026-05-30">
+
+            <label class="text-slate-500 text-sm font-semibold">Time</label>
+            <input id="time" class="input-field w-full mt-2 mb-5 p-4 rounded-2xl outline-none" placeholder="21:00">
+
+            <button onclick="addSlot()" class="w-full rounded-3xl px-6 py-4 bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400 text-slate-950 font-black hover:scale-[1.02] transition">
+              Add New Slot
+            </button>
+
+            <div class="surface-soft rounded-3xl p-5 mt-6">
+              <p class="font-black text-cyan-200">Tip</p>
+              <p class="text-slate-500 text-sm mt-1">Use format YYYY-MM-DD and 24-hour time like 18:00.</p>
+            </div>
+          </div>
+
+          <div class="surface rounded-[34px] p-6 xl:col-span-2">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <p class="text-slate-600 text-sm">Availability map</p>
+                <h2 class="text-4xl font-black tracking-[-0.05em]">All Slots</h2>
+              </div>
+
+              <button onclick="loadSlots()" class="pill rounded-2xl px-4 py-3 font-bold hover:scale-105 transition">
+                Refresh
+              </button>
+            </div>
+
+            <div id="slots" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+          </div>
+        </section>
+
+        <section class="grid grid-cols-1 xl:grid-cols-2 gap-5 mt-5">
+          <div id="activityPanel" class="surface rounded-[34px] p-6">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <p class="text-slate-600 text-sm">Automation logs</p>
+                <h2 class="text-4xl font-black tracking-[-0.05em]">Recent Activity</h2>
+              </div>
+
+              <button onclick="loadNotifications()" class="pill rounded-2xl px-4 py-3 font-bold hover:scale-105 transition">
+                Refresh
+              </button>
+            </div>
+
+            <div id="notifications" class="space-y-4"></div>
+          </div>
+
+          <div id="bookingsPanel" class="surface rounded-[34px] p-6">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <p class="text-slate-600 text-sm">Customer reservations</p>
+                <h2 class="text-4xl font-black tracking-[-0.05em]">All Bookings</h2>
+              </div>
+
+              <button onclick="loadBookings()" class="pill rounded-2xl px-4 py-3 font-bold hover:scale-105 transition">
+                Refresh
+              </button>
+            </div>
+
+            <div id="bookings" class="space-y-4"></div>
+          </div>
+        </section>
+      </main>
     </div>
-
-    <div class="glass rounded-3xl p-6 border border-slate-700 mt-6">
-      <h2 class="text-2xl font-black mb-4">Recent Activity</h2>
-
-      <button onclick="loadNotifications()" class="bg-blue-500 px-4 py-2 rounded-xl mb-4 font-bold hover:scale-105 transition">
-        Refresh Activity
-      </button>
-
-      <div id="notifications" class="space-y-3"></div>
-    </div>
-
-    <div class="glass rounded-3xl p-6 border border-slate-700 mt-6">
-      <h2 class="text-2xl font-black mb-4">All Bookings</h2>
-
-      <button onclick="loadBookings()" class="bg-purple-500 px-4 py-2 rounded-xl mb-4 font-bold hover:scale-105 transition">
-        Refresh Bookings
-      </button>
-
-      <div id="bookings" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-    </div>
-
   </div>
 
   <script>
@@ -132,7 +389,65 @@
       window.location.href = "dashboard.html";
     }
 
-    document.getElementById("welcome").innerHTML = "Welcome, " + user.name;
+    document.getElementById("sidebarName").innerHTML = user.name;
+    document.getElementById("sidebarEmail").innerHTML = user.email;
+
+    const stars = document.getElementById("stars");
+    const mouseAura = document.getElementById("mouseAura");
+
+    for (let i = 0; i < 170; i++) {
+      const star = document.createElement("div");
+      star.className = "star";
+      const size = Math.random() * 2.2 + 0.8;
+      star.style.width = size + "px";
+      star.style.height = size + "px";
+      star.style.left = Math.random() * 100 + "%";
+      star.style.top = Math.random() * 100 + "%";
+      star.style.animationDuration = (Math.random() * 4 + 2) + "s";
+      star.style.animationDelay = (Math.random() * 4) + "s";
+      if (Math.random() > 0.88) {
+        star.style.boxShadow = "0 0 10px rgba(147,197,253,0.8), 0 0 22px rgba(168,85,247,0.3)";
+      }
+      stars.appendChild(star);
+    }
+
+    document.addEventListener("mousemove", function (event) {
+      mouseAura.style.left = event.clientX + "px";
+      mouseAura.style.top = event.clientY + "px";
+    });
+
+    function showToast(message, type) {
+      const toastBox = document.getElementById("toastBox");
+      let color = "bg-slate-950 border-slate-700";
+
+      if (type === "success") {
+        color = "bg-emerald-950 border-emerald-500/70";
+      }
+
+      if (type === "error") {
+        color = "bg-red-950 border-red-500/70";
+      }
+
+      toastBox.innerHTML = `
+        <div class="toast ${color} border text-white px-5 py-4 rounded-3xl shadow-2xl">
+          ${message}
+        </div>
+      `;
+
+      setTimeout(function () {
+        toastBox.innerHTML = "";
+      }, 5200);
+    }
+
+    function setLoading(id, count, height) {
+      let html = "";
+
+      for (let i = 0; i < count; i++) {
+        html += `<div class="skeleton rounded-3xl ${height}"></div>`;
+      }
+
+      document.getElementById(id).innerHTML = html;
+    }
 
     async function loadAnalytics() {
       const response = await fetch(API + "/analytics");
@@ -151,7 +466,7 @@
       const time = document.getElementById("time").value;
 
       if (date === "" || time === "") {
-        alert("Please enter date and time");
+        showToast("Please enter both date and time.", "error");
         return;
       }
 
@@ -168,10 +483,13 @@
 
       const data = await response.json();
 
-      alert(data.message);
-
-      document.getElementById("date").value = "";
-      document.getElementById("time").value = "";
+      if (data.success === true) {
+        showToast(data.message, "success");
+        document.getElementById("date").value = "";
+        document.getElementById("time").value = "";
+      } else {
+        showToast(data.message, "error");
+      }
 
       loadSlots();
       loadAnalytics();
@@ -179,38 +497,55 @@
     }
 
     async function loadSlots() {
+      setLoading("slots", 4, "h-32");
+
       const response = await fetch(API + "/slots");
       const data = await response.json();
 
       let html = "";
 
       for (let slot of data) {
-        let statusClass = "text-green-300";
+        let statusClass = "text-emerald-300";
         let statusText = "Available";
+        let badgeClass = "bg-emerald-400/10";
         let deleteButton = "";
 
         if (slot.is_booked === true) {
           statusClass = "text-red-300";
           statusText = "Booked";
+          badgeClass = "bg-red-400/10";
         } else {
           deleteButton = `
-            <button onclick="deleteSlot(${slot.id})" class="mt-3 bg-red-500 px-3 py-2 rounded-xl font-bold hover:bg-red-400">
+            <button onclick="deleteSlot(${slot.id})" class="mt-4 rounded-2xl px-4 py-3 bg-red-500 text-white font-black hover:bg-red-400 transition">
               Delete Slot
             </button>
           `;
         }
 
         html += `
-          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-[1.02] transition">
-            <p class="font-bold text-lg">Slot ID: ${slot.id}</p>
-            <p class="text-slate-400">${slot.date} at ${slot.time}</p>
-            <p class="${statusClass}">Status: ${statusText}</p>
+          <div class="floating-card rounded-3xl p-5">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-slate-500 text-sm">Slot ID ${slot.id}</p>
+                <p class="text-3xl font-black">${slot.time}</p>
+                <p class="text-slate-500">${slot.date}</p>
+              </div>
+
+              <div class="${badgeClass} rounded-2xl px-3 py-2 ${statusClass} font-bold text-sm">
+                ${statusText}
+              </div>
+            </div>
+
             ${deleteButton}
           </div>
         `;
       }
 
-      document.getElementById("slots").innerHTML = html || "<p>No slots found.</p>";
+      document.getElementById("slots").innerHTML = html || `
+        <div class="floating-card rounded-3xl p-6 text-center text-slate-500">
+          No slots found.
+        </div>
+      `;
     }
 
     async function deleteSlot(slotId) {
@@ -220,7 +555,11 @@
 
       const data = await response.json();
 
-      alert(data.message);
+      if (data.success === true) {
+        showToast(data.message, "success");
+      } else {
+        showToast(data.message, "error");
+      }
 
       loadSlots();
       loadAnalytics();
@@ -228,6 +567,8 @@
     }
 
     async function loadBookings() {
+      setLoading("bookings", 3, "h-36");
+
       const response = await fetch(API + "/bookings");
       const data = await response.json();
 
@@ -235,34 +576,47 @@
 
       for (let booking of data) {
         let cancelButton = "";
+        let statusColor = "text-emerald-300";
+        let badgeClass = "bg-emerald-400/10";
 
         if (booking.status === "confirmed") {
           cancelButton = `
-            <button onclick="cancelBooking(${booking.id})" class="mt-3 bg-red-500 px-3 py-2 rounded-xl font-bold hover:bg-red-400">
+            <button onclick="cancelBooking(${booking.id})" class="mt-4 rounded-2xl px-4 py-3 bg-red-500 text-white font-black hover:bg-red-400 transition">
               Cancel Booking
             </button>
           `;
         }
 
-        let statusColor = "text-green-300";
-
         if (booking.status === "cancelled") {
           statusColor = "text-red-300";
+          badgeClass = "bg-red-400/10";
         }
 
         html += `
-          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-[1.02] transition">
-            <p class="font-bold text-lg">${booking.customer_name}</p>
-            <p class="text-slate-400">${booking.customer_email}</p>
-            <p class="text-slate-400">${booking.date} at ${booking.time}</p>
-            <p class="text-slate-400">Slot ID: ${booking.slot_id}</p>
-            <p class="${statusColor}">Status: ${booking.status}</p>
+          <div class="floating-card rounded-3xl p-5">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-2xl font-black">${booking.customer_name}</p>
+                <p class="text-slate-500 break-all">${booking.customer_email}</p>
+                <p class="text-slate-400 mt-2">${booking.date} at ${booking.time}</p>
+                <p class="text-slate-500 text-sm">Slot ID ${booking.slot_id} · Booking ID ${booking.id}</p>
+              </div>
+
+              <div class="${badgeClass} rounded-2xl px-3 py-2 ${statusColor} font-bold text-sm">
+                ${booking.status}
+              </div>
+            </div>
+
             ${cancelButton}
           </div>
         `;
       }
 
-      document.getElementById("bookings").innerHTML = html || "<p>No bookings found.</p>";
+      document.getElementById("bookings").innerHTML = html || `
+        <div class="floating-card rounded-3xl p-6 text-center text-slate-500">
+          No bookings found.
+        </div>
+      `;
     }
 
     async function cancelBooking(bookingId) {
@@ -272,7 +626,21 @@
 
       const data = await response.json();
 
-      alert(data.message);
+      let finalMessage = data.message;
+
+      if (data.email_result) {
+        if (data.email_result.success === true) {
+          finalMessage = finalMessage + "<br>Cancellation email sent to: " + data.email_result.to_email;
+        } else {
+          finalMessage = finalMessage + "<br>Email failed: " + data.email_result.message;
+        }
+      }
+
+      if (data.success === true) {
+        showToast(finalMessage, "success");
+      } else {
+        showToast(finalMessage, "error");
+      }
 
       loadBookings();
       loadSlots();
@@ -281,6 +649,8 @@
     }
 
     async function loadNotifications() {
+      setLoading("notifications", 4, "h-24");
+
       const response = await fetch(API + "/notifications");
       const data = await response.json();
 
@@ -288,14 +658,26 @@
 
       for (let item of data) {
         html += `
-          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-            <p class="font-semibold">${item.message}</p>
-            <p class="text-slate-400 text-sm">${item.created_at}</p>
+          <div class="floating-card rounded-3xl p-5">
+            <div class="flex items-start gap-4">
+              <div class="h-10 w-10 rounded-2xl bg-cyan-300/10 flex items-center justify-center text-cyan-200">
+                ⚡
+              </div>
+
+              <div>
+                <p class="font-bold">${item.message}</p>
+                <p class="text-slate-500 text-sm mt-1">${item.created_at}</p>
+              </div>
+            </div>
           </div>
         `;
       }
 
-      document.getElementById("notifications").innerHTML = html || "<p>No activity yet.</p>";
+      document.getElementById("notifications").innerHTML = html || `
+        <div class="floating-card rounded-3xl p-6 text-center text-slate-500">
+          No activity yet.
+        </div>
+      `;
     }
 
     function logout() {
@@ -308,6 +690,5 @@
     loadBookings();
     loadNotifications();
   </script>
-
 </body>
 </html>
