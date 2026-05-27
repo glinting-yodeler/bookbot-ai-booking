@@ -51,6 +51,12 @@ def send_email(to_email, subject, body):
             "message": "SMTP_APP_PASSWORD is missing"
         }
 
+    if to_email is None or to_email == "":
+        return {
+            "success": False,
+            "message": "Recipient email is missing"
+        }
+
     try:
         email_message = MIMEMultipart()
         email_message["From"] = smtp_email
@@ -67,13 +73,15 @@ def send_email(to_email, subject, body):
 
         return {
             "success": True,
-            "message": "Email sent"
+            "message": "Email sent successfully",
+            "to_email": to_email
         }
 
     except Exception as e:
         return {
             "success": False,
-            "message": str(e)
+            "message": str(e),
+            "to_email": to_email
         }
 
 
@@ -221,6 +229,11 @@ def register(name: str, email: str, password: str, role: str = "customer"):
 
         create_notification("New " + role + " account created for " + name)
 
+        email_result = {
+            "success": False,
+            "message": "Email not required for admin account"
+        }
+
         if role == "customer":
             create_customer_notification(
                 user_id,
@@ -236,11 +249,16 @@ def register(name: str, email: str, password: str, role: str = "customer"):
                 "BookBot Team"
             )
 
-            send_email(email, "Welcome to BookBot", welcome_body)
+            email_result = send_email(
+                email,
+                "Welcome to BookBot",
+                welcome_body
+            )
 
         return {
             "success": True,
-            "message": "Account created successfully"
+            "message": "Account created successfully",
+            "email_result": email_result
         }
 
     except sqlite3.IntegrityError:
@@ -476,9 +494,15 @@ def create_booking(user_id: int, slot_id: int):
         email_body
     )
 
+    if email_result["success"] == True:
+        create_notification("Confirmation email sent to " + customer_email)
+    else:
+        create_notification("Failed to send confirmation email to " + customer_email + ": " + email_result["message"])
+
     return {
         "success": True,
         "message": "Booking confirmed successfully",
+        "customer_email": customer_email,
         "email_result": email_result
     }
 
@@ -619,9 +643,15 @@ def cancel_booking(booking_id: int):
         email_body
     )
 
+    if email_result["success"] == True:
+        create_notification("Cancellation email sent to " + customer_email)
+    else:
+        create_notification("Failed to send cancellation email to " + customer_email + ": " + email_result["message"])
+
     return {
         "success": True,
         "message": "Booking cancelled successfully",
+        "customer_email": customer_email,
         "email_result": email_result
     }
 

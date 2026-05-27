@@ -20,7 +20,7 @@
       </button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
       <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
         <h2 class="text-2xl font-semibold mb-4">Available Slots</h2>
@@ -40,6 +40,16 @@
         </button>
 
         <div id="bookings" class="space-y-3"></div>
+      </div>
+
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800">
+        <h2 class="text-2xl font-semibold mb-4">My Notifications</h2>
+
+        <button onclick="loadCustomerNotifications()" class="bg-green-600 px-4 py-2 rounded-xl mb-4 hover:bg-green-500">
+          Refresh Notifications
+        </button>
+
+        <div id="customerNotifications" class="space-y-3"></div>
       </div>
 
     </div>
@@ -75,7 +85,7 @@
       window.location.href = "admin.html";
     }
 
-    document.getElementById("welcome").innerHTML = "Welcome, " + user.name;
+    document.getElementById("welcome").innerHTML = "Welcome, " + user.name + " (" + user.email + ")";
 
     async function loadSlots() {
       const response = await fetch(API + "/available-slots");
@@ -98,6 +108,18 @@
       document.getElementById("slots").innerHTML = html || "<p>No available slots.</p>";
     }
 
+    function buildEmailMessage(data) {
+      if (!data.email_result) {
+        return "No email result returned from backend.";
+      }
+
+      if (data.email_result.success === true) {
+        return "Confirmation email sent to: " + data.email_result.to_email;
+      }
+
+      return "Booking was saved, but email failed: " + data.email_result.message;
+    }
+
     async function bookSlot(slotId) {
       const url =
         API +
@@ -112,10 +134,19 @@
 
       const data = await response.json();
 
-      alert(data.message);
+      let finalMessage = data.message;
+
+      if (data.email_result) {
+        finalMessage = finalMessage + "\n\n" + buildEmailMessage(data);
+      }
+
+      alert(finalMessage);
+
+      console.log("Booking response:", data);
 
       loadSlots();
       loadMyBookings();
+      loadCustomerNotifications();
     }
 
     async function loadMyBookings() {
@@ -161,10 +192,41 @@
 
       const data = await response.json();
 
-      alert(data.message);
+      let finalMessage = data.message;
+
+      if (data.email_result) {
+        if (data.email_result.success === true) {
+          finalMessage = finalMessage + "\n\nCancellation email sent to: " + data.email_result.to_email;
+        } else {
+          finalMessage = finalMessage + "\n\nCancellation saved, but email failed: " + data.email_result.message;
+        }
+      }
+
+      alert(finalMessage);
+
+      console.log("Cancellation response:", data);
 
       loadSlots();
       loadMyBookings();
+      loadCustomerNotifications();
+    }
+
+    async function loadCustomerNotifications() {
+      const response = await fetch(API + "/customer-notifications/" + user.id);
+      const data = await response.json();
+
+      let html = "";
+
+      for (let item of data) {
+        html += `
+          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <p class="font-semibold">${item.message}</p>
+            <p class="text-slate-400 text-sm">${item.created_at}</p>
+          </div>
+        `;
+      }
+
+      document.getElementById("customerNotifications").innerHTML = html || "<p>No notifications yet.</p>";
     }
 
     async function sendMessage() {
@@ -241,6 +303,7 @@
 
     loadSlots();
     loadMyBookings();
+    loadCustomerNotifications();
   </script>
 
 </body>
