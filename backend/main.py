@@ -32,6 +32,19 @@ def hash_password(password):
     return hashed
 
 
+def create_notification(message):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT INTO notifications (message, created_at) VALUES (?, datetime('now'))",
+        (message,)
+    )
+
+    conn.commit()
+    conn.close()
+
+
 def setup_database():
     conn = get_connection()
     cursor = conn.cursor()
@@ -61,6 +74,14 @@ def setup_database():
             user_id INTEGER,
             slot_id INTEGER,
             status TEXT
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            message TEXT,
+            created_at TEXT
         )
     """)
 
@@ -128,6 +149,8 @@ def register(name: str, email: str, password: str, role: str = "customer"):
 
         conn.commit()
         conn.close()
+
+        create_notification("New " + role + " account created for " + name)
 
         return {
             "success": True,
@@ -239,6 +262,8 @@ def add_slot(date: str, time: str):
     conn.commit()
     conn.close()
 
+    create_notification("Admin added a new slot on " + date + " at " + time)
+
     return {
         "success": True,
         "message": "Slot added successfully"
@@ -250,7 +275,7 @@ def delete_slot(slot_id: int):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT is_booked FROM slots WHERE id = ?", (slot_id,))
+    cursor.execute("SELECT date, time, is_booked FROM slots WHERE id = ?", (slot_id,))
     slot = cursor.fetchone()
 
     if slot is None:
@@ -261,7 +286,7 @@ def delete_slot(slot_id: int):
             "message": "Slot not found"
         }
 
-    if slot[0] == 1:
+    if slot[2] == 1:
         conn.close()
 
         return {
@@ -269,10 +294,15 @@ def delete_slot(slot_id: int):
             "message": "Cannot delete a booked slot"
         }
 
+    slot_date = slot[0]
+    slot_time = slot[1]
+
     cursor.execute("DELETE FROM slots WHERE id = ?", (slot_id,))
 
     conn.commit()
     conn.close()
+
+    create_notification("Admin deleted Slot ID " + str(slot_id) + " on " + slot_date + " at " + slot_time)
 
     return {
         "success": True,
@@ -285,7 +315,7 @@ def create_booking(user_id: int, slot_id: int):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id FROM users WHERE id = ?", (user_id,))
+    cursor.execute("SELECT id, name FROM users WHERE id = ?", (user_id,))
     user = cursor.fetchone()
 
     if user is None:
@@ -296,7 +326,7 @@ def create_booking(user_id: int, slot_id: int):
             "message": "User not found"
         }
 
-    cursor.execute("SELECT id, is_booked FROM slots WHERE id = ?", (slot_id,))
+    cursor.execute("SELECT id, date, time, is_booked FROM slots WHERE id = ?", (slot_id,))
     slot = cursor.fetchone()
 
     if slot is None:
@@ -307,7 +337,7 @@ def create_booking(user_id: int, slot_id: int):
             "message": "Slot not found"
         }
 
-    if slot[1] == 1:
+    if slot[3] == 1:
         conn.close()
 
         return {
@@ -327,6 +357,14 @@ def create_booking(user_id: int, slot_id: int):
 
     conn.commit()
     conn.close()
+
+    customer_name = user[1]
+    slot_date = slot[1]
+    slot_time = slot[2]
+
+    create_notification(
+        customer_name + " booked Slot ID " + str(slot_id) + " on " + slot_date + " at " + slot_time
+    )
 
     return {
         "success": True,
@@ -405,7 +443,14 @@ def cancel_booking(booking_id: int):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT slot_id, status FROM bookings WHERE id = ?", (booking_id,))
+    cursor.execute("""
+        SELECT bookings.slot_id, bookings.status, users.name, slots.date, slots.time
+        FROM bookings
+        JOIN users ON bookings.user_id = users.id
+        JOIN slots ON bookings.slot_id = slots.id
+        WHERE bookings.id = ?
+    """, (booking_id,))
+
     booking = cursor.fetchone()
 
     if booking is None:
@@ -417,6 +462,9 @@ def cancel_booking(booking_id: int):
         }
 
     slot_id = booking[0]
+    customer_name = booking[2]
+    slot_date = booking[3]
+    slot_time = booking[4]
 
     cursor.execute(
         "UPDATE bookings SET status = ? WHERE id = ?",
@@ -430,6 +478,10 @@ def cancel_booking(booking_id: int):
 
     conn.commit()
     conn.close()
+
+    create_notification(
+        customer_name + " cancelled Booking ID " + str(booking_id) + " for " + slot_date + " at " + slot_time
+    )
 
     return {
         "success": True,
@@ -457,6 +509,9 @@ def get_analytics():
     cursor.execute("SELECT COUNT(*) FROM bookings WHERE status = 'cancelled'")
     cancelled_bookings = cursor.fetchone()[0]
 
+    cursor.execute("SELECT COUNT(*) FROM notifications")
+    total_notifications = cursor.fetchone()[0]
+
     conn.close()
 
     return {
@@ -464,8 +519,37 @@ def get_analytics():
         "total_slots": total_slots,
         "available_slots": available_slots,
         "confirmed_bookings": confirmed_bookings,
-        "cancelled_bookings": cancelled_bookings
+        "cancelled_bookings": cancelled_bookings,
+        "total_notifications": total_notifications
     }
+
+
+@app.get("/notifications")
+def get_notifications():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, message, created_at
+        FROM notifications
+        ORDER BY id DESC
+        LIMIT 10
+    """)
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    notifications = []
+
+    for row in rows:
+        notifications.append({
+            "id": row[0],
+            "message": row[1],
+            "created_at": row[2]
+        })
+
+    return notifications
 
 
 @app.post("/chat")

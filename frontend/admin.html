@@ -20,7 +20,7 @@
       </button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
 
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
         <p class="text-slate-400">Customers</p>
@@ -45,6 +45,11 @@
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
         <p class="text-slate-400">Cancelled</p>
         <h2 id="cancelledBookings" class="text-3xl font-bold">0</h2>
+      </div>
+
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+        <p class="text-slate-400">Activity</p>
+        <h2 id="totalNotifications" class="text-3xl font-bold">0</h2>
       </div>
 
     </div>
@@ -73,6 +78,16 @@
         <div id="slots" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
       </div>
 
+    </div>
+
+    <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 mt-6">
+      <h2 class="text-2xl font-semibold mb-4">Recent Activity</h2>
+
+      <button onclick="loadNotifications()" class="bg-blue-600 px-4 py-2 rounded-xl mb-4 hover:bg-blue-500">
+        Refresh Activity
+      </button>
+
+      <div id="notifications" class="space-y-3"></div>
     </div>
 
     <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 mt-6">
@@ -111,6 +126,7 @@
       document.getElementById("availableSlots").innerHTML = data.available_slots;
       document.getElementById("confirmedBookings").innerHTML = data.confirmed_bookings;
       document.getElementById("cancelledBookings").innerHTML = data.cancelled_bookings;
+      document.getElementById("totalNotifications").innerHTML = data.total_notifications;
     }
 
     async function addSlot() {
@@ -142,6 +158,7 @@
 
       loadSlots();
       loadAnalytics();
+      loadNotifications();
     }
 
     async function loadSlots() {
@@ -190,6 +207,7 @@
 
       loadSlots();
       loadAnalytics();
+      loadNotifications();
     }
 
     async function loadBookings() {
@@ -242,6 +260,25 @@
       loadBookings();
       loadSlots();
       loadAnalytics();
+      loadNotifications();
+    }
+
+    async function loadNotifications() {
+      const response = await fetch(API + "/notifications");
+      const data = await response.json();
+
+      let html = "";
+
+      for (let item of data) {
+        html += `
+          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <p class="font-semibold">${item.message}</p>
+            <p class="text-slate-400 text-sm">${item.created_at}</p>
+          </div>
+        `;
+      }
+
+      document.getElementById("notifications").innerHTML = html || "<p>No activity yet.</p>";
     }
 
     function logout() {
@@ -252,6 +289,7 @@
     loadAnalytics();
     loadSlots();
     loadBookings();
+    loadNotifications();
   </script>
 
 </body>
