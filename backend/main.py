@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
 import hashlib
 import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 from groq import Groq
 
@@ -32,6 +35,48 @@ def hash_password(password):
     return hashed
 
 
+def send_email(to_email, subject, body):
+    smtp_email = os.getenv("SMTP_EMAIL")
+    smtp_password = os.getenv("SMTP_APP_PASSWORD")
+
+    if smtp_email is None or smtp_email == "":
+        return {
+            "success": False,
+            "message": "SMTP_EMAIL is missing"
+        }
+
+    if smtp_password is None or smtp_password == "":
+        return {
+            "success": False,
+            "message": "SMTP_APP_PASSWORD is missing"
+        }
+
+    try:
+        email_message = MIMEMultipart()
+        email_message["From"] = smtp_email
+        email_message["To"] = to_email
+        email_message["Subject"] = subject
+
+        email_message.attach(MIMEText(body, "plain"))
+
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(smtp_email, smtp_password)
+        server.sendmail(smtp_email, to_email, email_message.as_string())
+        server.quit()
+
+        return {
+            "success": True,
+            "message": "Email sent"
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e)
+        }
+
+
 def create_notification(message):
     conn = get_connection()
     cursor = conn.cursor()
@@ -39,6 +84,19 @@ def create_notification(message):
     cursor.execute(
         "INSERT INTO notifications (message, created_at) VALUES (?, datetime('now'))",
         (message,)
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def create_customer_notification(user_id, message):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT INTO customer_notifications (user_id, message, created_at) VALUES (?, ?, datetime('now'))",
+        (user_id, message)
     )
 
     conn.commit()
@@ -80,6 +138,15 @@ def setup_database():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS notifications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            message TEXT,
+            created_at TEXT
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS customer_notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
             message TEXT,
             created_at TEXT
         )
@@ -147,10 +214,29 @@ def register(name: str, email: str, password: str, role: str = "customer"):
             (name, email, hashed_password, role)
         )
 
+        user_id = cursor.lastrowid
+
         conn.commit()
         conn.close()
 
         create_notification("New " + role + " account created for " + name)
+
+        if role == "customer":
+            create_customer_notification(
+                user_id,
+                "Welcome to BookBot. You can now view slots, book appointments, and manage your bookings."
+            )
+
+            welcome_body = (
+                "Hi " + name + ",\n\n"
+                "Welcome to BookBot.\n\n"
+                "Your customer account has been created successfully. "
+                "You can now log in, view available slots, book appointments, and manage cancellations.\n\n"
+                "Regards,\n"
+                "BookBot Team"
+            )
+
+            send_email(email, "Welcome to BookBot", welcome_body)
 
         return {
             "success": True,
@@ -315,7 +401,7 @@ def create_booking(user_id: int, slot_id: int):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id, name FROM users WHERE id = ?", (user_id,))
+    cursor.execute("SELECT id, name, email FROM users WHERE id = ?", (user_id,))
     user = cursor.fetchone()
 
     if user is None:
@@ -359,6 +445,7 @@ def create_booking(user_id: int, slot_id: int):
     conn.close()
 
     customer_name = user[1]
+    customer_email = user[2]
     slot_date = slot[1]
     slot_time = slot[2]
 
@@ -366,9 +453,33 @@ def create_booking(user_id: int, slot_id: int):
         customer_name + " booked Slot ID " + str(slot_id) + " on " + slot_date + " at " + slot_time
     )
 
+    create_customer_notification(
+        user_id,
+        "Your booking is confirmed for " + slot_date + " at " + slot_time + ". Slot ID: " + str(slot_id)
+    )
+
+    email_body = (
+        "Hi " + customer_name + ",\n\n"
+        "Your booking has been confirmed.\n\n"
+        "Booking details:\n"
+        "Date: " + slot_date + "\n"
+        "Time: " + slot_time + "\n"
+        "Slot ID: " + str(slot_id) + "\n\n"
+        "If you need to cancel, please log in to your BookBot dashboard.\n\n"
+        "Regards,\n"
+        "BookBot Team"
+    )
+
+    email_result = send_email(
+        customer_email,
+        "Booking Confirmed - BookBot",
+        email_body
+    )
+
     return {
         "success": True,
-        "message": "Booking confirmed successfully"
+        "message": "Booking confirmed successfully",
+        "email_result": email_result
     }
 
 
@@ -444,7 +555,7 @@ def cancel_booking(booking_id: int):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT bookings.slot_id, bookings.status, users.name, slots.date, slots.time
+        SELECT bookings.slot_id, bookings.status, users.id, users.name, users.email, slots.date, slots.time
         FROM bookings
         JOIN users ON bookings.user_id = users.id
         JOIN slots ON bookings.slot_id = slots.id
@@ -462,9 +573,11 @@ def cancel_booking(booking_id: int):
         }
 
     slot_id = booking[0]
-    customer_name = booking[2]
-    slot_date = booking[3]
-    slot_time = booking[4]
+    user_id = booking[2]
+    customer_name = booking[3]
+    customer_email = booking[4]
+    slot_date = booking[5]
+    slot_time = booking[6]
 
     cursor.execute(
         "UPDATE bookings SET status = ? WHERE id = ?",
@@ -483,9 +596,33 @@ def cancel_booking(booking_id: int):
         customer_name + " cancelled Booking ID " + str(booking_id) + " for " + slot_date + " at " + slot_time
     )
 
+    create_customer_notification(
+        user_id,
+        "Your booking for " + slot_date + " at " + slot_time + " has been cancelled."
+    )
+
+    email_body = (
+        "Hi " + customer_name + ",\n\n"
+        "Your booking has been cancelled.\n\n"
+        "Cancelled booking details:\n"
+        "Date: " + slot_date + "\n"
+        "Time: " + slot_time + "\n"
+        "Booking ID: " + str(booking_id) + "\n\n"
+        "You can log in to BookBot to book another available slot.\n\n"
+        "Regards,\n"
+        "BookBot Team"
+    )
+
+    email_result = send_email(
+        customer_email,
+        "Booking Cancelled - BookBot",
+        email_body
+    )
+
     return {
         "success": True,
-        "message": "Booking cancelled successfully"
+        "message": "Booking cancelled successfully",
+        "email_result": email_result
     }
 
 
@@ -550,6 +687,54 @@ def get_notifications():
         })
 
     return notifications
+
+
+@app.get("/customer-notifications/{user_id}")
+def get_customer_notifications(user_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, message, created_at
+        FROM customer_notifications
+        WHERE user_id = ?
+        ORDER BY id DESC
+        LIMIT 10
+    """, (user_id,))
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    notifications = []
+
+    for row in rows:
+        notifications.append({
+            "id": row[0],
+            "message": row[1],
+            "created_at": row[2]
+        })
+
+    return notifications
+
+
+@app.post("/test-email")
+def test_email(to_email: str):
+    email_body = (
+        "Hello,\n\n"
+        "This is a test email from BookBot SMTP automation.\n\n"
+        "If you received this, Gmail SMTP is working correctly.\n\n"
+        "Regards,\n"
+        "BookBot Team"
+    )
+
+    result = send_email(
+        to_email,
+        "BookBot Test Email",
+        email_body
+    )
+
+    return result
 
 
 @app.post("/chat")
